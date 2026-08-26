@@ -1,9 +1,13 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const { ZodError } = require('zod');
 const storage = require('../shared/storage');
 const redis = require('../shared/redis-client');
 const builder = require('../build-server/builder');
+const logger = require('../shared/logger').child('APIServer');
+const { deploySchema, storageConfigSchema, redeployParamsSchema } = require('./schemas');
 
 const app = express();
 const PORT = process.env.API_PORT || 9000;
@@ -17,13 +21,29 @@ app.use(express.static(path.resolve(__dirname, '../dashboard')));
 // Telemetry counters
 let totalDeploymentsCount = 0;
 let successfulDeploymentsCount = 0;
+let failedDeploymentsCount = 0;
+const requestMetrics = {
+  totalRequests: 0,
+  endpoints: {},
+};
+
+// Global metrics middleware
+app.use((req, res, next) => {
+  requestMetrics.totalRequests++;
+  const route = `${req.method} ${req.path}`;
+  requestMetrics.endpoints[route] = (requestMetrics.endpoints[route] || 0) + 1;
+  next();
+});
 
 /**
- * Trigger new project deployment
+ * Trigger new project deployment with Zod schema validation
  * POST /api/deploy
  */
 app.post('/api/deploy', async (req, res) => {
   try {
+    // 1. Zod Input Validation
+    const validatedData = deploySchema.parse(req.body);
+
     const {
       gitUrl,
       templateId,
@@ -32,11 +52,7 @@ app.post('/api/deploy', async (req, res) => {
       buildCommand = '',
       installCommand = '',
       outputDir = 'dist',
-    } = req.body;
-
-    if (!gitUrl && !templateId) {
-      return res.status(400).json({ error: 'Please provide either a Git repository URL or select a starter template.' });
-    }
+    } = validatedData;
 
     // Generate safe project slug
     let projectSlug = projectName
@@ -49,21 +65,25 @@ app.post('/api/deploy', async (req, res) => {
     const payload = {
       deploymentId,
       projectSlug,
-      gitUrl,
-      templateId,
+      gitUrl: gitUrl || null,
+      templateId: templateId || null,
       branch,
       buildCommand,
       installCommand,
       outputDir,
     };
 
+    logger.info(`Received deployment request for [${projectSlug}] (ID: ${deploymentId})`, { payload });
+
     // Asynchronously dispatch build task
     builder.executeBuild(payload)
       .then(() => {
         successfulDeploymentsCount++;
+        logger.info(`Deployment ${deploymentId} finished successfully`);
       })
       .catch((err) => {
-        console.error(`[API Server] Deployment ${deploymentId} failed:`, err.message);
+        failedDeploymentsCount++;
+        logger.error(`Deployment ${deploymentId} failed: ${err.message}`);
       });
 
     // Respond immediately with deployment tracker details
@@ -78,7 +98,16 @@ app.post('/api/deploy', async (req, res) => {
       subdomainUrl: `http://${projectSlug}.localhost:8000/`,
     });
   } catch (error) {
-    console.error('[API Server /api/deploy Error]', error);
+    if (error instanceof ZodError) {
+      logger.warn('Invalid deployment payload', { issues: error.issues });
+      return res.status(400).json({
+        error: 'Validation Error',
+        message: 'Invalid input parameters for deployment',
+        issues: error.issues.map(i => ({ path: i.path.join('.'), message: i.message }))
+      });
+    }
+
+    logger.error('Failed to initialize deployment', { error: error.message });
     res.status(500).json({ error: 'Failed to initialize deployment', details: error.message });
   }
 });
@@ -135,6 +164,7 @@ app.get('/api/deployments', async (req, res) => {
     }
     res.json({ deployments: history });
   } catch (error) {
+    logger.error('Error fetching deployments', { error: error.message });
     res.status(500).json({ error: error.message });
   }
 });
@@ -151,17 +181,20 @@ app.get('/api/deployments/:deploymentId', async (req, res) => {
     }
     res.json({ deployment: typeof data === 'string' ? JSON.parse(data) : data });
   } catch (error) {
+    logger.error('Error fetching deployment details', { error: error.message });
     res.status(500).json({ error: error.message });
   }
 });
 
 /**
- * Re-trigger deployment
+ * Re-trigger deployment with parameter validation
  * POST /api/deployments/:deploymentId/redeploy
  */
 app.post('/api/deployments/:deploymentId/redeploy', async (req, res) => {
   try {
-    const raw = await redis.get(`deployment:${req.params.deploymentId}`);
+    const { deploymentId } = redeployParamsSchema.parse(req.params);
+
+    const raw = await redis.get(`deployment:${deploymentId}`);
     if (!raw) {
       return res.status(404).json({ error: 'Deployment not found' });
     }
@@ -186,6 +219,10 @@ app.post('/api/deployments/:deploymentId/redeploy', async (req, res) => {
       logsUrl: `/api/logs/${newDeploymentId}`,
     });
   } catch (error) {
+    if (error instanceof ZodError) {
+      return res.status(400).json({ error: 'Validation Error', issues: error.issues });
+    }
+    logger.error('Error redeploying project', { error: error.message });
     res.status(500).json({ error: error.message });
   }
 });
@@ -225,6 +262,45 @@ app.get('/api/analytics', async (req, res) => {
 });
 
 /**
+ * Prometheus & JSON Metrics Endpoint (Observability & Monitoring)
+ * GET /api/metrics
+ */
+app.get('/api/metrics', async (req, res) => {
+  try {
+    const memory = process.memoryUsage();
+    const rawHistory = await redis.get('deployments:history');
+    let history = [];
+    if (rawHistory) {
+      try { history = JSON.parse(rawHistory); } catch (e) { history = []; }
+    }
+
+    const metricsData = {
+      uptime_seconds: Math.floor(process.uptime()),
+      total_deployments_count: history.length,
+      successful_deployments_count: history.filter(d => d.status === 'READY').length,
+      failed_deployments_count: history.filter(d => d.status === 'FAILED').length,
+      memory_heap_used_bytes: memory.heapUsed,
+      memory_heap_total_bytes: memory.heapTotal,
+      memory_rss_bytes: memory.rss,
+      total_api_requests: requestMetrics.totalRequests,
+      endpoint_requests: requestMetrics.endpoints,
+    };
+
+    if (req.headers.accept && req.headers.accept.includes('text/plain')) {
+      let prometheusFormat = `# HELP autodeploy_uptime_seconds Process uptime\n# TYPE autodeploy_uptime_seconds gauge\nautodeploy_uptime_seconds ${metricsData.uptime_seconds}\n`;
+      prometheusFormat += `# HELP autodeploy_total_deployments Total deployments\n# TYPE autodeploy_total_deployments counter\nautodeploy_total_deployments ${metricsData.total_deployments_count}\n`;
+      prometheusFormat += `# HELP autodeploy_memory_heap_bytes Memory heap used\n# TYPE autodeploy_memory_heap_bytes gauge\nautodeploy_memory_heap_bytes ${metricsData.memory_heap_used_bytes}\n`;
+      res.setHeader('Content-Type', 'text/plain; version=0.0.4');
+      return res.send(prometheusFormat);
+    }
+
+    res.json({ status: 'ok', metrics: metricsData });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
  * Health check & component diagnostics
  * GET /api/health
  */
@@ -244,22 +320,29 @@ app.get('/api/health', async (req, res) => {
 });
 
 /**
- * Storage configuration update
+ * Storage configuration update with Zod validation
  * POST /api/config/storage
  */
 app.post('/api/config/storage', (req, res) => {
-  const { mode, awsConfig } = req.body;
-  storage.setMode(mode, awsConfig);
-  res.json({
-    success: true,
-    message: `Storage updated to ${storage.getMode().toUpperCase()}`,
-    currentMode: storage.getMode(),
-  });
+  try {
+    const validated = storageConfigSchema.parse(req.body);
+    storage.setMode(validated.mode, validated.awsConfig);
+    res.json({
+      success: true,
+      message: `Storage updated to ${storage.getMode().toUpperCase()}`,
+      currentMode: storage.getMode(),
+    });
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return res.status(400).json({ error: 'Validation Error', issues: error.issues });
+    }
+    res.status(500).json({ error: error.message });
+  }
 });
 
 if (require.main === module) {
   app.listen(PORT, () => {
-    console.log(`[APIServer] Automated Deployment System API listening on port ${PORT} (http://localhost:${PORT})`);
+    logger.info(`Automated Deployment System API listening on port ${PORT} (http://localhost:${PORT})`);
   });
 }
 

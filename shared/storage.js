@@ -1,6 +1,8 @@
+require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 const mime = require('mime-types');
+const logger = require('./logger').child('Storage');
 
 // Try importing AWS S3 SDK if available
 let S3Client, PutObjectCommand, GetObjectCommand, ListObjectsV2Command;
@@ -35,14 +37,14 @@ class StorageService {
             secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
           },
         });
-        console.log(`[Storage] Configured with AWS S3 Bucket: ${this.bucketName} (${this.region})`);
+        logger.info(`Configured with AWS S3 Bucket: ${this.bucketName} (${this.region})`);
       } catch (err) {
-        console.warn(`[Storage] Failed to init AWS S3 Client, defaulting to Local Storage. Error: ${err.message}`);
+        logger.warn(`Failed to init AWS S3 Client, defaulting to Local Storage. Error: ${err.message}`);
         this.mode = 'local';
       }
     } else {
       this.mode = 'local';
-      console.log(`[Storage] Running in Local Storage Mode at: ${this.localStorageDir}`);
+      logger.info(`Running in Local Storage Mode at: ${this.localStorageDir}`);
     }
   }
 
@@ -62,10 +64,10 @@ class StorageService {
           secretAccessKey: awsConfig.secretAccessKey,
         },
       });
-      console.log(`[Storage] Switched to AWS S3: ${this.bucketName}`);
+      logger.info(`Switched to AWS S3: ${this.bucketName}`);
     } else {
       this.mode = 'local';
-      console.log(`[Storage] Switched to Local S3 Emulation`);
+      logger.info(`Switched to Local S3 Emulation`);
     }
   }
 
@@ -180,7 +182,6 @@ class StorageService {
       if (fs.existsSync(baseDir) && fs.statSync(baseDir).isDirectory()) {
         scanDir(baseDir, '');
       } else {
-        // scan root with filter
         scanDir(this.localStorageDir, '');
       }
       return results.filter(item => item.key.startsWith(prefix));
