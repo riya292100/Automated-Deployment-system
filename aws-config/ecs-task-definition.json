@@ -1,0 +1,44 @@
+{
+  "family": "automated-deployment-build-task",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "cpu": "1024",
+  "memory": "2048",
+  "executionRoleArn": "arn:aws:iam::123456789012:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::123456789012:role/ecsTaskRole",
+  "containerDefinitions": [
+    {
+      "name": "build-server-container",
+      "image": "123456789012.dkr.ecr.us-east-1.amazonaws.com/automated-deployment-builder:latest",
+      "essential": true,
+      "environment": [
+        {
+          "name": "STORAGE_MODE",
+          "value": "aws"
+        },
+        {
+          "name": "AWS_REGION",
+          "value": "us-east-1"
+        },
+        {
+          "name": "AWS_S3_BUCKET",
+          "value": "automated-deployment-bucket"
+        },
+        {
+          "name": "REDIS_URL",
+          "value": "redis://redis-cluster.cache.amazonaws.com:6379"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/automated-deployment-builder",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "builder"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>React Enterprise Portal - Automated Deployment</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: #131b2e;
+      --card-border: #1e293b;
+      --primary: #6366f1;
+      --accent: #ec4899;
+      --text: #f1f5f9;
+      --text-muted: #64748b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .header {
+      padding: 16px 32px;
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .react-badge {
+      background: rgba(99, 102, 241, 0.2);
+      color: #818cf8;
+      border: 1px solid #4f46e5;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+    }
+    .main {
+      flex: 1;
+      padding: 32px;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 24px;
+    }
+    .card-title {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+    .card-metric {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #fff;
+    }
+    .btn {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: transform 0.15s;
+    }
+    .btn:hover { transform: scale(1.03); }
+    .interactive-box {
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .counter-display {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #38bdf8;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="logo">
+      <span>⚛️</span>
+      <span>Enterprise React App</span>
+    </div>
+    <div class="react-badge">Single Page Application (SPA)</div>
+  </header>
+
+  <main class="main">
+    <div style="margin-bottom: 24px;">
+      <h1 style="font-size: 1.8rem; margin-bottom: 6px;">Live React Build Sandbox</h1>
+      <p style="color: var(--text-muted);">Compiled via Docker, stored in S3, and served through custom reverse proxy with instant client-side routing.</p>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="card-title">Active Pods</div>
+        <div class="card-metric">12 / 12</div>
+        <p style="color: #10b981; font-size: 0.85rem; margin-top: 6px;">● All ECS nodes healthy</p>
+      </div>
+      <div class="card">
+        <div class="card-title">Memory Allocation</div>
+        <div class="card-metric">512 MB</div>
+        <p style="color: #6366f1; font-size: 0.85rem; margin-top: 6px;">Fargate serverless profile</p>
+      </div>
+      <div class="card">
+        <div class="card-title">CDN Cache Hit</div>
+        <div class="card-metric">99.4%</div>
+        <p style="color: #38bdf8; font-size: 0.85rem; margin-top: 6px;">Redis metadata lookup: 0.4ms</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Interactive React State Manager</h3>
+      <p style="color: var(--text-muted); margin: 8px 0 16px;">Test dynamic state manipulation inside the automated deployment sandbox:</p>
+      <div class="interactive-box">
+        <button class="btn" id="incrementBtn">Click to Dispatch Action</button>
+        <span class="counter-display" id="counter">State Actions: 0</span>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    let count = 0;
+    const btn = document.getElementById('incrementBtn');
+    const counter = document.getElementById('counter');
+    btn.addEventListener('click', () => {
+      count++;
+      counter.textContent = `State Actions: ${count}`;
+      btn.style.filter = `hue-rotate(${count * 30}deg)`;
+    });
+  </script>
+</body>
+</html>

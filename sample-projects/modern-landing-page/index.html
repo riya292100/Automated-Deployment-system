@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexus Cloud - Next-Gen Autonomous Cloud Platform</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="glow-bg"></div>
+  
+  <header class="navbar">
+    <div class="container nav-container">
+      <div class="logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">Nexus<strong>Cloud</strong></span>
+      </div>
+      <nav class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#architecture">Architecture</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#demo" class="btn btn-sm btn-primary">Launch Console</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="container hero-container">
+        <div class="badge">🚀 Deployed Automatically via Automated Deployment System</div>
+        <h1 class="hero-title">Deploy Apps Globally with <span class="gradient-text">Zero-Latency</span> Edge Routing</h1>
+        <p class="hero-subtitle">Automated Docker builds, ECS orchestrations, S3 static distribution, and Redis caching — delivered directly to your users in milliseconds.</p>
+        
+        <div class="hero-actions">
+          <button class="btn btn-primary" onclick="alert('Welcome to Nexus Cloud! Your deployment is fully live and operational.')">Explore Live Demo</button>
+          <a href="#features" class="btn btn-outline">System Features &rarr;</a>
+        </div>
+
+        <div class="hero-stats">
+          <div class="stat-card">
+            <div class="stat-value" id="stat-latency">12ms</div>
+            <div class="stat-label">Avg Edge Latency</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">99.99%</div>
+            <div class="stat-label">ECS Uptime SLA</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">0.8s</div>
+            <div class="stat-label">S3 Cache Hit Time</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">100%</div>
+            <div class="stat-label">Automated CI/CD</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+      <div class="container">
+        <div class="section-header">
+          <h2>Engineered for High-Velocity Teams</h2>
+          <p>Everything you need to orchestrate containerized microservices and static frontends seamlessly.</p>
+        </div>
+
+        <div class="grid features-grid">
+          <div class="card feature-card">
+            <div class="feature-icon">🐳</div>
+            <h3>Docker Containerization</h3>
+            <p>Every commit triggers isolated container builds packaged into optimized lightweight images ready for ECR.</p>
+          </div>
+
+          <div class="card feature-card">
+            <div class="feature-icon">⚡</div>
+            <h3>AWS ECS Orchestration</h3>
+            <p>Auto-scales tasks horizontally across AWS Fargate and EC2 clusters to meet traffic surges smoothly.</p>
+          </div>
+
+          <div class="card feature-card">
+            <div class="feature-icon">📦</div>
+            <h3>S3 Reverse Proxy Engine</h3>
+            <p>Routes custom subdomains to isolated S3 storage buckets with instant asset streaming and gzip compression.</p>
+          </div>
+
+          <div class="card feature-card">
+            <div class="feature-icon">🚀</div>
+            <h3>Redis Caching & Pub/Sub</h3>
+            <p>Real-time terminal log streaming and sub-millisecond route resolution through in-memory cache keys.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive Interactive Console Preview -->
+    <section id="demo" class="demo-section">
+      <div class="container">
+        <div class="terminal-card">
+          <div class="terminal-header">
+            <div class="terminal-dots">
+              <span class="dot red"></span>
+              <span class="dot yellow"></span>
+              <span class="dot green"></span>
+            </div>
+            <div class="terminal-title">nexus-deploy-agent@v1.0.0 / automated-ci-cd</div>
+          </div>
+          <div class="terminal-body" id="live-console">
+            <div class="line dim">[00:00:01] ➔ Connecting to AWS Elastic Container Registry (ECR)...</div>
+            <div class="line success">[00:00:02] ✔ Image pulled: nexus-app:latest (SHA-256 verified)</div>
+            <div class="line">[00:00:03] ➔ Initializing S3 static asset distribution sync...</div>
+            <div class="line success">[00:00:04] ✔ Uploaded 24 static assets to s3://automated-deployment-bucket/__outputs/</div>
+            <div class="line">[00:00:05] ➔ Registering subdomain routing with Reverse Proxy...</div>
+            <div class="line cyan">[00:00:06] 🚀 Deployment Ready: Host mapped to custom edge router!</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-content">
+      <p>&copy; 2026 Nexus Cloud Automated Deployment System. Built with AWS, Docker, Redis & S3.</p>
+      <div class="status-indicator">
+        <span class="status-dot pulse"></span>
+        <span>All Systems Operational</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>

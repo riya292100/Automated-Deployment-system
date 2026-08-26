@@ -1,0 +1,88 @@
+{
+  "pipeline": {
+    "name": "AutomatedDeploymentPipeline",
+    "roleArn": "arn:aws:iam::123456789012:role/AWS-CodePipeline-Service-Role",
+    "artifactStore": {
+      "type": "S3",
+      "location": "automated-deployment-pipeline-artifacts"
+    },
+    "stages": [
+      {
+        "name": "Source",
+        "actions": [
+          {
+            "name": "GitHub_Source",
+            "actionTypeId": {
+              "category": "Source",
+              "owner": "ThirdParty",
+              "provider": "GitHub",
+              "version": "1"
+            },
+            "outputArtifacts": [
+              {
+                "name": "SourceOutput"
+              }
+            ],
+            "configuration": {
+              "Owner": "organization-name",
+              "Repo": "automated-deployment-system",
+              "Branch": "main",
+              "OAuthToken": "{{resolve:secretsmanager:github-token:SecretString:token}}"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Build",
+        "actions": [
+          {
+            "name": "Docker_Image_Build",
+            "actionTypeId": {
+              "category": "Build",
+              "owner": "AWS",
+              "provider": "CodeBuild",
+              "version": "1"
+            },
+            "inputArtifacts": [
+              {
+                "name": "SourceOutput"
+              }
+            ],
+            "outputArtifacts": [
+              {
+                "name": "BuildOutput"
+              }
+            ],
+            "configuration": {
+              "ProjectName": "automated-deployment-builder-job"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Deploy",
+        "actions": [
+          {
+            "name": "Deploy_To_ECS",
+            "actionTypeId": {
+              "category": "Deploy",
+              "owner": "AWS",
+              "provider": "ECS",
+              "version": "1"
+            },
+            "inputArtifacts": [
+              {
+                "name": "BuildOutput"
+              }
+            ],
+            "configuration": {
+              "ClusterName": "production-cluster",
+              "ServiceName": "automated-deployment-service",
+              "FileName": "imagedefinitions.json"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

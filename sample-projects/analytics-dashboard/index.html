@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cloud Metrics & Telemetry Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #07090e;
+      --panel: #0e131f;
+      --border: #1a2236;
+      --accent: #10b981;
+      --text: #e2e8f0;
+      --text-dim: #64748b;
+    }
+    * { margin:0; padding:0; box-sizing: border-box; }
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 30px;
+    }
+    .container { max-width: 1100px; margin: 0 auto; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+    .title { font-size: 1.6rem; font-weight: 700; }
+    .status-badge {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+    }
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .metric-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      padding: 20px;
+      border-radius: 12px;
+    }
+    .metric-label { font-size: 0.8rem; color: var(--text-dim); text-transform: uppercase; margin-bottom: 6px; }
+    .metric-val { font-size: 1.8rem; font-weight: 700; color: #fff; }
+    .table-panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .table-panel h3 { padding: 16px 20px; border-bottom: 1px solid var(--border); font-size: 1.1rem; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th, td { padding: 12px 20px; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
+    th { color: var(--text-dim); background: rgba(255, 255, 255, 0.02); }
+    .tag-ok { color: #10b981; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div>
+        <h1 class="title">Cloud Analytics & Real-Time Telemetry</h1>
+        <p style="color: var(--text-dim); font-size: 0.9rem;">Automated S3 Static Edge Distribution Node</p>
+      </div>
+      <div class="status-badge">● Live Pipeline Online</div>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-label">Total Ingestion</div>
+        <div class="metric-val" id="ingest-metric">1,482,900</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Throughput / sec</div>
+        <div class="metric-val" id="rps-metric">2,420 rps</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Edge Cache Hit</div>
+        <div class="metric-val">99.8%</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Avg TTL</div>
+        <div class="metric-val">86,400s</div>
+      </div>
+    </div>
+
+    <div class="table-panel">
+      <h3>Recent Edge Requests & Route Logs</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Method</th>
+            <th>Route</th>
+            <th>Status</th>
+            <th>Latency</th>
+          </tr>
+        </thead>
+        <tbody id="logs-body">
+          <tr>
+            <td>2026-08-26 19:12:04</td>
+            <td>GET</td>
+            <td>/index.html</td>
+            <td class="tag-ok">200 OK (Cache HIT)</td>
+            <td>1.2 ms</td>
+          </tr>
+          <tr>
+            <td>2026-08-26 19:12:02</td>
+            <td>GET</td>
+            <td>/style.css</td>
+            <td class="tag-ok">200 OK (Cache HIT)</td>
+            <td>0.9 ms</td>
+          </tr>
+          <tr>
+            <td>2026-08-26 19:11:58</td>
+            <td>GET</td>
+            <td>/main.js</td>
+            <td class="tag-ok">200 OK (Cache HIT)</td>
+            <td>1.1 ms</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // Live update simulation
+    setInterval(() => {
+      const rps = 2400 + Math.floor(Math.random() * 80);
+      document.getElementById('rps-metric').textContent = `${rps} rps`;
+    }, 2500);
+  </script>
+</body>
+</html>
