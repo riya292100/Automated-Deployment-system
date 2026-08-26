@@ -1,76 +1,202 @@
-const assert = require('assert');
-const http = require('http');
+const request = require('supertest');
 const apiApp = require('../api-server/index');
 const proxyApp = require('../s3-reverse-proxy/index');
+const logger = require('../shared/logger');
 
-async function runApiAndProxyTests() {
-  console.log('--- Testing API Server & Reverse Proxy ---');
+describe('API Server & Reverse Proxy Integration', () => {
+  let createdDeployId = null;
 
-  // Start test servers
-  const apiServer = apiApp.listen(9099);
-  const proxyServer = proxyApp.listen(8099);
+  describe('GET /api/health', () => {
+    test('should return 200 with HEALTHY status and component breakdown', async () => {
+      const res = await request(apiApp).get('/api/health');
+      expect(res.status).toBe(200);
+      expect(res.body.status).toBe('HEALTHY');
+      expect(res.body.components.apiServer.status).toBe('ONLINE');
+      expect(res.body.components.redisService.status).toBe('ONLINE');
+    });
+  });
 
-  const request = (port, path, method = 'GET', body = null) => {
-    return new Promise((resolve, reject) => {
-      const payload = body ? JSON.stringify(body) : null;
-      const req = http.request({
-        hostname: 'localhost',
-        port,
-        path,
-        method,
-        headers: payload ? {
-          'Content-Type': 'application/json',
-          'Content-Length': Buffer.byteLength(payload)
-        } : {}
-      }, (res) => {
-        let data = '';
-        res.on('data', chunk => data += chunk);
-        res.on('end', () => {
-          let parsed = data;
-          try { parsed = JSON.parse(data); } catch(e) {}
-          resolve({ status: res.statusCode, headers: res.headers, data: parsed, raw: data });
+  describe('GET /api/analytics', () => {
+    test('should return system analytics and telemetry metrics', async () => {
+      const res = await request(apiApp).get('/api/analytics');
+      expect(res.status).toBe(200);
+      expect(res.body.totalDeployments).toBeDefined();
+      expect(res.body.cacheHitRate).toBeDefined();
+    });
+  });
+
+  describe('GET /api/metrics', () => {
+    test('should return JSON metrics by default', async () => {
+      const res = await request(apiApp).get('/api/metrics');
+      expect(res.status).toBe(200);
+      expect(res.body.metrics).toBeDefined();
+      expect(res.body.metrics.uptime_seconds).toBeGreaterThanOrEqual(0);
+    });
+
+    test('should return Prometheus formatted metrics when text/plain requested', async () => {
+      const res = await request(apiApp)
+        .get('/api/metrics')
+        .set('Accept', 'text/plain');
+      expect(res.status).toBe(200);
+      expect(res.text).toContain('autodeploy_uptime_seconds');
+    });
+  });
+
+  describe('POST /api/deploy - Input Validation', () => {
+    test('should reject deployment request when both gitUrl and templateId are missing', async () => {
+      const res = await request(apiApp)
+        .post('/api/deploy')
+        .send({ projectName: 'invalid-app' });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toBe('Validation Error');
+      expect(Array.isArray(res.body.issues)).toBe(true);
+    });
+
+    test('should reject deployment request with invalid project name characters', async () => {
+      const res = await request(apiApp)
+        .post('/api/deploy')
+        .send({
+          templateId: 'modern-landing-page',
+          projectName: 'invalid@app#name!'
+        });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toBe('Validation Error');
+    });
+
+    test('should accept valid deployment request with templateId', async () => {
+      const res = await request(apiApp)
+        .post('/api/deploy')
+        .send({
+          templateId: 'modern-landing-page',
+          projectName: 'jest-api-app',
+        });
+
+      expect(res.status).toBe(202);
+      expect(res.body.success).toBe(true);
+      expect(res.body.deploymentId).toBeDefined();
+      expect(res.body.projectSlug).toBe('jest-api-app');
+      createdDeployId = res.body.deploymentId;
+    });
+  });
+
+  describe('GET /api/deployments & GET /api/deployments/:id', () => {
+    test('should return list of deployments', async () => {
+      const res = await request(apiApp).get('/api/deployments');
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body.deployments)).toBe(true);
+    });
+
+    test('should return 404 for non-existent deployment ID', async () => {
+      const res = await request(apiApp).get('/api/deployments/dep-nonexistent-12345');
+      expect(res.status).toBe(404);
+      expect(res.body.error).toBe('Deployment not found');
+    });
+
+    test('should retrieve details of created deployment if exists', async () => {
+      if (createdDeployId) {
+        const res = await request(apiApp).get(`/api/deployments/${createdDeployId}`);
+        expect([200, 404]).toContain(res.status);
+      }
+    });
+  });
+
+  describe('POST /api/deployments/:id/redeploy', () => {
+    test('should reject redeploy with invalid/short deploymentId', async () => {
+      const res = await request(apiApp).post('/api/deployments/a/redeploy');
+      expect(res.status).toBe(400);
+    });
+
+    test('should return 404 when redeploying unknown deployment', async () => {
+      const res = await request(apiApp).post('/api/deployments/dep-unknown-99999/redeploy');
+      expect(res.status).toBe(404);
+    });
+  });
+
+  describe('GET /api/logs/:deploymentId', () => {
+    test('should establish SSE headers for log streaming', async () => {
+      const server = apiApp.listen(0);
+      const port = server.address().port;
+      
+      await new Promise((resolve) => {
+        const http = require('http');
+        const req = http.get(`http://localhost:${port}/api/logs/dep-sse-test`, (res) => {
+          expect(res.headers['content-type']).toContain('text/event-stream');
+          expect(res.headers['cache-control']).toContain('no-cache');
+          req.destroy();
+          server.close(resolve);
+        });
+        req.on('error', () => {
+          server.close(resolve);
         });
       });
-      req.on('error', reject);
-      if (payload) req.write(payload);
-      req.end();
     });
-  };
+  });
 
-  try {
-    // 1. Health check
-    const health = await request(9099, '/api/health');
-    assert.strictEqual(health.status, 200);
-    assert.strictEqual(health.data.status, 'HEALTHY');
-    console.log('✔ API /api/health returned 200 HEALTHY');
+  describe('POST /api/config/storage - Validation', () => {
+    test('should reject invalid storage mode', async () => {
+      const res = await request(apiApp)
+        .post('/api/config/storage')
+        .send({ mode: 'invalid-mode' });
 
-    // 2. Analytics
-    const analytics = await request(9099, '/api/analytics');
-    assert.strictEqual(analytics.status, 200);
-    assert.ok(analytics.data.cacheHitRate);
-    console.log('✔ API /api/analytics returned 200');
+      expect(res.status).toBe(400);
+      expect(res.body.error).toBe('Validation Error');
+    });
 
-    // 3. Reverse Proxy Route Test
-    const proxyRes = await request(8099, '/site/test-sample-project/index.html');
-    assert.strictEqual(proxyRes.status, 200);
-    assert.ok(proxyRes.headers['content-type'].includes('text/html'));
-    console.log('✔ Reverse Proxy /site/test-sample-project/ returned 200 with HTML content');
+    test('should accept valid storage mode update', async () => {
+      const res = await request(apiApp)
+        .post('/api/config/storage')
+        .send({ mode: 'local' });
 
-    // 4. Reverse Proxy SPA Fallback Test
-    const spaRes = await request(8099, '/site/test-sample-project/dashboard/settings');
-    assert.strictEqual(spaRes.status, 200);
-    assert.ok(spaRes.headers['x-proxy-origin'].includes('Fallback'));
-    console.log('✔ Reverse Proxy SPA Fallback correctly served index.html on deep client route');
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+    });
+  });
 
-    console.log('✅ API & Reverse Proxy tests passed!\n');
-  } finally {
-    apiServer.close();
-    proxyServer.close();
-  }
-}
+  describe('S3 Reverse Proxy Routing', () => {
+    test('should serve welcome page when no project slug or subdomain provided', async () => {
+      const res = await request(proxyApp).get('/');
+      expect(res.status).toBe(200);
+      expect(res.text).toContain('S3 Reverse Proxy Online');
+    });
 
-module.exports = runApiAndProxyTests;
+    test('should return proxy health status', async () => {
+      const res = await request(proxyApp).get('/health');
+      expect(res.status).toBe(200);
+      expect(res.body.service).toBe('s3-reverse-proxy');
+      expect(res.body.status).toBe('healthy');
+    });
 
-if (require.main === module) {
-  runApiAndProxyTests().catch(e => { console.error(e); process.exit(1); });
-}
+    test('should serve index.html for deployed project via /site/:slug/', async () => {
+      const res = await request(proxyApp).get('/site/jest-landing-app/index.html');
+      expect(res.status).toBe(200);
+      expect(res.headers['content-type']).toContain('text/html');
+      expect(res.headers['x-proxy-origin']).toBe('Automated-Deployment-S3-Proxy');
+    });
+
+    test('should serve SPA fallback for client-side routes on deployed project', async () => {
+      const res = await request(proxyApp).get('/site/jest-landing-app/dashboard/settings');
+      expect(res.status).toBe(200);
+      expect(res.headers['content-type']).toContain('text/html');
+      expect(res.headers['x-proxy-origin']).toContain('SPA-Fallback');
+    });
+
+    test('should return 404 for non-existent project asset', async () => {
+      const res = await request(proxyApp).get('/site/non-existent-project-xyz/bundle.js');
+      expect(res.status).toBe(404);
+    });
+  });
+
+  describe('Logger Service', () => {
+    test('should support debug, info, warn, error and child logger contexts', () => {
+      const child = logger.child('UnitTest');
+      expect(() => {
+        child.debug('debug test');
+        child.info('info test', { id: 1 });
+        child.warn('warn test');
+        child.error('error test', { err: 'test' });
+      }).not.toThrow();
+    });
+  });
+});

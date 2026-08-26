@@ -1,13 +1,19 @@
 {
   "name": "automated-deployment-system",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Production-grade Automated Deployment System with AWS ECS, S3, Redis, Reverse Proxy, and Interactive Dashboard",
   "main": "start-all.js",
   "type": "commonjs",
   "scripts": {
     "start": "node start-all.js",
     "dev": "node start-all.js",
-    "test": "node tests/run-all-tests.js",
+    "test": "jest --runInBand --forceExit",
+    "test:coverage": "jest --coverage --runInBand --forceExit",
+    "test:watch": "jest --watch",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"**/*.{js,json,md,html,css}\"",
+    "format:check": "prettier --check \"**/*.{js,json,md,html,css}\"",
     "api": "node api-server/index.js",
     "proxy": "node s3-reverse-proxy/index.js"
   },
@@ -17,9 +23,11 @@
     "s3-reverse-proxy",
     "redis",
     "docker",
-    "ci-cd"
+    "ci-cd",
+    "zod",
+    "jest"
   ],
-  "author": "Antigravity Dev",
+  "author": "riya292100",
   "license": "MIT",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.750.0",
@@ -28,13 +36,13 @@
     "express": "^4.21.2",
     "mime-types": "^2.1.35",
     "ws": "^8.18.0",
-    "zod": "^4.4.3"
+    "zod": "^3.24.2"
   },
   "devDependencies": {
-    "eslint": "^10.9.1",
-    "eslint-config-prettier": "^10.1.8",
-    "jest": "^30.4.2",
-    "prettier": "^3.9.6",
-    "supertest": "^7.2.2"
+    "eslint": "^9.21.0",
+    "eslint-config-prettier": "^10.0.1",
+    "jest": "^29.7.0",
+    "prettier": "^3.5.2",
+    "supertest": "^7.0.0"
   }
 }

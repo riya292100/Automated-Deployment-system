@@ -1,42 +1,46 @@
-const assert = require('assert');
 const builder = require('../build-server/builder');
 const storage = require('../shared/storage');
 const redis = require('../shared/redis-client');
 
-async function runBuilderTests() {
-  console.log('--- Testing Build Server Worker ---');
+describe('Build Server Worker', () => {
+  const deploymentId = `jest-build-${Date.now()}`;
+  const projectSlug = 'jest-landing-app';
 
-  const deploymentId = `test-build-${Date.now()}`;
-  const projectSlug = 'test-sample-project';
+  test('should execute full build process on starter template', async () => {
+    const result = await builder.executeBuild({
+      deploymentId,
+      projectSlug,
+      templateId: 'modern-landing-page',
+      branch: 'main',
+    });
 
-  const result = await builder.executeBuild({
-    deploymentId,
-    projectSlug,
-    templateId: 'modern-landing-page',
-    branch: 'main',
+    expect(result).toBeDefined();
+    expect(result.status).toBe('READY');
+    expect(result.fileCount).toBeGreaterThan(0);
+    expect(result.totalBytes).toBeGreaterThan(0);
+    expect(result.url).toContain(projectSlug);
+  }, 15000);
+
+  test('should persist build artifacts in storage with __outputs prefix', async () => {
+    const obj = await storage.getObject(`__outputs/${projectSlug}/index.html`);
+    expect(obj).toBeDefined();
+    expect(obj.body.length).toBeGreaterThan(0);
   });
 
-  assert.strictEqual(result.status, 'READY');
-  assert.ok(result.fileCount > 0);
-  assert.ok(result.totalBytes > 0);
-  assert.ok(result.url.includes(projectSlug));
-  console.log(`✔ builder.executeBuild completed with status: ${result.status} (${result.fileCount} files uploaded)`);
+  test('should register project metadata in Redis routing table', async () => {
+    const cached = await redis.get(`project:${projectSlug}`);
+    expect(cached).toBeDefined();
+    const parsed = typeof cached === 'string' ? JSON.parse(cached) : cached;
+    expect(parsed.status).toBe('READY');
+    expect(parsed.projectSlug).toBe(projectSlug);
+  });
 
-  // Verify asset in S3
-  const s3Obj = await storage.getObject(`__outputs/${projectSlug}/index.html`);
-  assert.ok(s3Obj.body.length > 0);
-  console.log(`✔ Verified output in storage: __outputs/${projectSlug}/index.html`);
-
-  // Verify route in Redis
-  const cached = await redis.get(`project:${projectSlug}`);
-  assert.ok(cached !== null);
-  console.log(`✔ Verified route mapping in Redis: project:${projectSlug}`);
-
-  console.log('✅ Build Worker tests passed!\n');
-}
-
-module.exports = runBuilderTests;
-
-if (require.main === module) {
-  runBuilderTests().catch(e => { console.error(e); process.exit(1); });
-}
+  test('should reject invalid build with missing source', async () => {
+    await expect(
+      builder.executeBuild({
+        deploymentId: 'fail-test',
+        projectSlug: 'fail-test',
+      })
+    ).rejects.toThrow();
+  });
+});

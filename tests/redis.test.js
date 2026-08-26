@@ -1,46 +1,53 @@
-const assert = require('assert');
 const redis = require('../shared/redis-client');
 
-async function runRedisTests() {
-  console.log('--- Testing Redis Service ---');
+describe('Redis Client & Pub/Sub Service', () => {
+  test('should respond to ping with PONG', async () => {
+    const ping = await redis.ping();
+    expect(ping).toBe('PONG');
+  });
 
-  // Test 1: Ping
-  const ping = await redis.ping();
-  assert.strictEqual(ping, 'PONG');
-  console.log('✔ redis.ping returned PONG');
+  test('should set and get string and JSON values', async () => {
+    const payload = { service: 'jest-test', timestamp: Date.now() };
+    await redis.set('jest:key', payload);
 
-  // Test 2: Set & Get
-  await redis.set('test:key', { name: 'deployment-system', status: 'OK' });
-  const valRaw = await redis.get('test:key');
-  const val = JSON.parse(valRaw);
-  assert.strictEqual(val.name, 'deployment-system');
-  assert.strictEqual(val.status, 'OK');
-  console.log('✔ redis.set and redis.get working');
+    const valRaw = await redis.get('jest:key');
+    expect(valRaw).toBeDefined();
+    const parsed = JSON.parse(valRaw);
+    expect(parsed.service).toBe('jest-test');
+  });
 
-  // Test 3: Pub/Sub
-  let receivedMessage = null;
-  const channel = 'logs:test-deploy';
-  const handler = (msg) => {
-    receivedMessage = msg;
-  };
+  test('should publish and subscribe to channel events', (done) => {
+    const channel = 'logs:jest-pubsub';
+    const testMsg = { step: 'build', status: 'OK' };
 
-  redis.subscribe(channel, handler);
-  await redis.publish(channel, { message: 'Deploy step 1 finished' });
-  
-  assert.ok(receivedMessage !== null);
-  console.log('✔ redis.publish and redis.subscribe delivered event');
+    const handler = (msg) => {
+      expect(msg).toBeDefined();
+      redis.unsubscribe(channel, handler);
+      done();
+    };
 
-  // Test 4: Logs history retention
-  const history = redis.getLogs('test-deploy');
-  assert.ok(history.length > 0);
-  console.log(`✔ redis.getLogs preserved ${history.length} log entry`);
+    redis.subscribe(channel, handler);
+    redis.publish(channel, testMsg);
+  });
 
-  redis.unsubscribe(channel, handler);
-  console.log('✅ Redis tests passed!\n');
-}
+  test('should maintain log history per deployment channel', async () => {
+    const deployId = 'jest-deploy-hist';
+    const channel = `logs:${deployId}`;
 
-module.exports = runRedisTests;
+    await redis.publish(channel, { message: 'Step 1: Init' });
+    await redis.publish(channel, { message: 'Step 2: Done' });
 
-if (require.main === module) {
-  runRedisTests().catch(e => { console.error(e); process.exit(1); });
-}
+    const logs = redis.getLogs(deployId);
+    expect(Array.isArray(logs)).toBe(true);
+    expect(logs.length).toBeGreaterThanOrEqual(2);
+  });
+
+  test('should handle hashes with hset, hget, and hgetall', async () => {
+    await redis.hset('jest:hash', 'field1', { count: 42 });
+    const val = await redis.hget('jest:hash', 'field1');
+    expect(JSON.parse(val).count).toBe(42);
+
+    const all = await redis.hgetall('jest:hash');
+    expect(all.field1).toBeDefined();
+  });
+});

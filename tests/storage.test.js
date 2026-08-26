@@ -1,32 +1,39 @@
-const assert = require('assert');
 const storage = require('../shared/storage');
 
-async function runStorageTests() {
-  console.log('--- Testing Storage Service ---');
+describe('Storage Service', () => {
+  const testKey = '__outputs/jest-test-app/index.html';
+  const testHtml = '<!DOCTYPE html><html><body><h1>Jest Storage Test</h1></body></html>';
 
-  // Test 1: Put object
-  const testKey = '__outputs/test-app/index.html';
-  const testHtml = '<html><body><h1>Test S3 Content</h1></body></html>';
-  await storage.putObject(testKey, testHtml, 'text/html');
-  console.log('✔ storage.putObject successful');
+  test('should put an object into storage with correct MIME type', async () => {
+    const result = await storage.putObject(testKey, testHtml, 'text/html');
+    expect(result).toBeDefined();
+    expect(result.Key || result.ETag).toBeDefined();
+  });
 
-  // Test 2: Get object
-  const obj = await storage.getObject(testKey);
-  assert.strictEqual(obj.body.toString(), testHtml);
-  assert.ok(obj.contentType.includes('text/html'));
-  console.log('✔ storage.getObject matched content and contentType');
+  test('should retrieve the object from storage matching content and contentType', async () => {
+    const obj = await storage.getObject(testKey);
+    expect(obj).toBeDefined();
+    expect(obj.body.toString()).toBe(testHtml);
+    expect(obj.contentType).toContain('text/html');
+    expect(obj.contentLength).toBeGreaterThan(0);
+  });
 
-  // Test 3: List objects
-  const list = await storage.listObjects('__outputs/test-app');
-  assert.ok(list.length > 0);
-  assert.ok(list.some(item => item.key === testKey));
-  console.log(`✔ storage.listObjects returned ${list.length} objects`);
+  test('should throw error when fetching non-existent key', async () => {
+    await expect(storage.getObject('__outputs/non-existent/file.xyz')).rejects.toThrow();
+  });
 
-  console.log('✅ Storage tests passed!\n');
-}
+  test('should list objects with given prefix', async () => {
+    const list = await storage.listObjects('__outputs/jest-test-app');
+    expect(Array.isArray(list)).toBe(true);
+    expect(list.length).toBeGreaterThan(0);
+    expect(list.some(item => item.key === testKey)).toBe(true);
+  });
 
-module.exports = runStorageTests;
+  test('should support mode inspection and switching', () => {
+    const currentMode = storage.getMode();
+    expect(['local', 'aws']).toContain(currentMode);
 
-if (require.main === module) {
-  runStorageTests().catch(e => { console.error(e); process.exit(1); });
-}
+    storage.setMode('local');
+    expect(storage.getMode()).toBe('local');
+  });
+});
