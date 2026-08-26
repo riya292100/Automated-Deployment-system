@@ -120,9 +120,10 @@ class BuildWorker {
         'step'
       );
       const hasPackageJson = fs.existsSync(path.join(buildFolder, 'package.json'));
+      const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 
       if (hasPackageJson) {
-        const installCmd = installCommand || 'npm.cmd install || npm install';
+        const installCmd = installCommand || `${npmCmd} install`;
         await this.log(deploymentId, `➔ Running install command: ${installCmd}`, 'info');
         try {
           execSync(installCmd, {
@@ -161,7 +162,7 @@ class BuildWorker {
         if (pkg.scripts && pkg.scripts.build) {
           await this.log(deploymentId, `➔ Running detected script: npm run build`, 'info');
           try {
-            execSync('npm.cmd run build || npm run build', {
+            execSync(`${npmCmd} run build`, {
               cwd: buildFolder,
               stdio: 'pipe',
               timeout: 120000,

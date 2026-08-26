@@ -3,8 +3,19 @@ const apiApp = require('../api-server/index');
 const proxyApp = require('../s3-reverse-proxy/index');
 const logger = require('../shared/logger');
 
+const builder = require('../build-server/builder');
+
 describe('API Server & Reverse Proxy Integration', () => {
   let createdDeployId = null;
+
+  beforeAll(async () => {
+    await builder.executeBuild({
+      deploymentId: 'api-fixture-dep',
+      projectSlug: 'jest-landing-app',
+      templateId: 'modern-landing-page',
+      branch: 'main',
+    });
+  });
 
   describe('GET /api/health', () => {
     test('should return 200 with HEALTHY status and component breakdown', async () => {
@@ -108,19 +119,24 @@ describe('API Server & Reverse Proxy Integration', () => {
 
   describe('GET /api/logs/:deploymentId', () => {
     test('should establish SSE headers for log streaming', async () => {
-      const server = apiApp.listen(0);
-      const port = server.address().port;
-
-      await new Promise((resolve) => {
-        const http = require('http');
-        const req = http.get(`http://localhost:${port}/api/logs/dep-sse-test`, (res) => {
-          expect(res.headers['content-type']).toContain('text/event-stream');
-          expect(res.headers['cache-control']).toContain('no-cache');
-          req.destroy();
-          server.close(resolve);
-        });
-        req.on('error', () => {
-          server.close(resolve);
+      await new Promise((resolve, reject) => {
+        const server = apiApp.listen(0, '127.0.0.1', () => {
+          const port = server.address().port;
+          const http = require('http');
+          const req = http.get(`http://127.0.0.1:${port}/api/logs/dep-sse-test`, (res) => {
+            try {
+              expect(res.headers['content-type']).toContain('text/event-stream');
+              expect(res.headers['cache-control']).toContain('no-cache');
+              req.destroy();
+              server.close(resolve);
+            } catch (err) {
+              req.destroy();
+              server.close(() => reject(err));
+            }
+          });
+          req.on('error', (err) => {
+            server.close(() => reject(err));
+          });
         });
       });
     });

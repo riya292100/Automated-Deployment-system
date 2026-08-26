@@ -12,8 +12,8 @@
     "test:watch": "jest --watch",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "format": "prettier --write \"**/*.{js,json,md,html,css}\"",
-    "format:check": "prettier --check \"**/*.{js,json,md,html,css}\"",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "api": "node api-server/index.js",
     "proxy": "node s3-reverse-proxy/index.js"
   },

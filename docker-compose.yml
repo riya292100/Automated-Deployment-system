@@ -8,7 +8,7 @@ services:
       dockerfile: api-server/Dockerfile
     container_name: autodeploy-api-server
     ports:
-      - "9000:9000"
+      - '9000:9000'
     environment:
       - API_PORT=9000
       - REDIS_URL=redis://redis-service:6379
@@ -28,7 +28,7 @@ services:
       dockerfile: s3-reverse-proxy/Dockerfile
     container_name: autodeploy-reverse-proxy
     ports:
-      - "8000:8000"
+      - '8000:8000'
     environment:
       - PROXY_PORT=8000
       - REDIS_URL=redis://redis-service:6379
@@ -44,7 +44,7 @@ services:
     image: redis:7-alpine
     container_name: autodeploy-redis
     ports:
-      - "6379:6379"
+      - '6379:6379'
     restart: unless-stopped
 
 volumes:
