@@ -1,3 +1,4 @@
+require('dotenv').config();
 const http = require('http');
 const apiApp = require('./api-server/index');
 const proxyApp = require('./s3-reverse-proxy/index');
