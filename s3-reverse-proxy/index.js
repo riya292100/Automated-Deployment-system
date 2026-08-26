@@ -1,7 +1,9 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const storage = require('../shared/storage');
 const redis = require('../shared/redis-client');
+const logger = require('../shared/logger').child('ReverseProxy');
 
 const app = express();
 const PORT = process.env.PROXY_PORT || 8000;
@@ -13,7 +15,7 @@ app.use((req, res, next) => {
   const start = Date.now();
   res.on('finish', () => {
     const duration = Date.now() - start;
-    console.log(`[ReverseProxy] ${req.method} ${req.originalUrl} -> ${res.statusCode} (${duration}ms)`);
+    logger.info(`${req.method} ${req.originalUrl} -> ${res.statusCode} (${duration}ms)`);
   });
   next();
 });
@@ -21,7 +23,7 @@ app.use((req, res, next) => {
 /**
  * Health check endpoint
  */
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
   res.json({
     service: 's3-reverse-proxy',
     status: 'healthy',
@@ -43,7 +45,7 @@ app.all('*', async (req, res) => {
       const parts = filePath.replace(/^\/site\//, '').split('/');
       projectSlug = parts[0];
       filePath = '/' + parts.slice(1).join('/');
-    } 
+    }
     // 2. Check subdomain routing: slug.localhost:8000
     else {
       const host = req.hostname || req.headers.host || '';
@@ -68,39 +70,49 @@ app.all('*', async (req, res) => {
     let projectInfo = null;
     const cachedData = await redis.get(`project:${projectSlug}`);
     if (cachedData) {
-      try { projectInfo = JSON.parse(cachedData); } catch (e) { projectInfo = cachedData; }
+      try {
+        projectInfo = JSON.parse(cachedData);
+      } catch (_e) {
+        projectInfo = cachedData;
+      }
     }
 
-    const s3Prefix = projectInfo && projectInfo.s3Prefix ? projectInfo.s3Prefix : `__outputs/${projectSlug}`;
+    const s3Prefix =
+      projectInfo && projectInfo.s3Prefix ? projectInfo.s3Prefix : `__outputs/${projectSlug}`;
     const cleanFilePath = filePath.replace(/^\/+/, '');
     let targetKey = `${s3Prefix}/${cleanFilePath}`;
 
     try {
       // Attempt to fetch requested file from S3
       const fileData = await storage.getObject(targetKey);
-      
+
       res.setHeader('Content-Type', fileData.contentType);
       res.setHeader('Content-Length', fileData.contentLength);
       res.setHeader('X-Proxy-Origin', 'Automated-Deployment-S3-Proxy');
       res.setHeader('X-Storage-Mode', storage.getMode());
-      res.setHeader('Cache-Control', cleanFilePath.endsWith('.html') ? 'no-cache' : 'public, max-age=86400');
-      
+      res.setHeader(
+        'Cache-Control',
+        cleanFilePath.endsWith('.html') ? 'no-cache' : 'public, max-age=86400'
+      );
+
       return res.status(200).send(fileData.body);
-    } catch (err) {
-      // SPA Fallback: If not found and not a direct file asset (e.g. not ending with .js/.css/.png), try index.html
-      const isDirectAsset = /\.(js|css|png|jpg|jpeg|gif|svg|ico|json|woff2|woff|ttf|map)$/i.test(cleanFilePath);
-      
+    } catch (_err) {
+      // SPA Fallback: If not found and not a direct file asset, try index.html
+      const isDirectAsset = /\.(js|css|png|jpg|jpeg|gif|svg|ico|json|woff2|woff|ttf|map)$/i.test(
+        cleanFilePath
+      );
+
       if (!isDirectAsset) {
         try {
           const fallbackKey = `${s3Prefix}/index.html`;
           const fallbackData = await storage.getObject(fallbackKey);
-          
+
           res.setHeader('Content-Type', 'text/html; charset=utf-8');
           res.setHeader('X-Proxy-Origin', 'Automated-Deployment-S3-Proxy-SPA-Fallback');
           res.setHeader('X-Storage-Mode', storage.getMode());
-          
+
           return res.status(200).send(fallbackData.body);
-        } catch (fallbackErr) {
+        } catch (_fallbackErr) {
           // If even index.html does not exist
           return res.status(404).send(render404Page(projectSlug, cleanFilePath, projectInfo));
         }
@@ -109,7 +121,7 @@ app.all('*', async (req, res) => {
       return res.status(404).send(render404Page(projectSlug, cleanFilePath, projectInfo));
     }
   } catch (error) {
-    console.error('[ReverseProxy Error]', error);
+    logger.error('Reverse Proxy Internal Error', { error: error.message });
     res.status(500).json({ error: 'Reverse Proxy Internal Error', message: error.message });
   }
 });
@@ -170,7 +182,7 @@ function render404Page(projectSlug, requestedPath, projectInfo) {
 
 if (require.main === module) {
   app.listen(PORT, () => {
-    console.log(`[ReverseProxy] S3 Reverse Proxy server listening on port ${PORT} (http://localhost:${PORT})`);
+    logger.info(`S3 Reverse Proxy server listening on port ${PORT} (http://localhost:${PORT})`);
   });
 }
 

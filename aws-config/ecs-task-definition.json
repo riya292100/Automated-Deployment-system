@@ -1,9 +1,7 @@
 {
   "family": "automated-deployment-build-task",
   "networkMode": "awsvpc",
-  "requiresCompatibilities": [
-    "FARGATE"
-  ],
+  "requiresCompatibilities": ["FARGATE"],
   "cpu": "1024",
   "memory": "2048",
   "executionRoleArn": "arn:aws:iam::123456789012:role/ecsTaskExecutionRole",

@@ -10,11 +10,12 @@ const LOG_LEVELS = {
 };
 
 const currentLevelName = (process.env.LOG_LEVEL || 'info').toLowerCase();
-const currentLevel = LOG_LEVELS[currentLevelName] !== undefined ? LOG_LEVELS[currentLevelName] : LOG_LEVELS.info;
+const currentLevel =
+  LOG_LEVELS[currentLevelName] !== undefined ? LOG_LEVELS[currentLevelName] : LOG_LEVELS.info;
 
 function formatLog(level, context, message, meta = {}) {
   const timestamp = new Date().toISOString();
-  
+
   if (process.env.LOG_FORMAT === 'json') {
     return JSON.stringify({
       timestamp,
@@ -61,7 +62,7 @@ const logger = {
       warn: (msg, meta) => logger.warn(context, msg, meta),
       error: (msg, meta) => logger.error(context, msg, meta),
     };
-  }
+  },
 };
 
 module.exports = logger;

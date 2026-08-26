@@ -12,7 +12,7 @@ try {
   PutObjectCommand = s3Sdk.PutObjectCommand;
   GetObjectCommand = s3Sdk.GetObjectCommand;
   ListObjectsV2Command = s3Sdk.ListObjectsV2Command;
-} catch (e) {
+} catch (_e) {
   // Fallback to local storage if AWS SDK isn't loaded
 }
 
@@ -39,7 +39,9 @@ class StorageService {
         });
         logger.info(`Configured with AWS S3 Bucket: ${this.bucketName} (${this.region})`);
       } catch (err) {
-        logger.warn(`Failed to init AWS S3 Client, defaulting to Local Storage. Error: ${err.message}`);
+        logger.warn(
+          `Failed to init AWS S3 Client, defaulting to Local Storage. Error: ${err.message}`
+        );
         this.mode = 'local';
       }
     } else {
@@ -142,7 +144,7 @@ class StorageService {
 
   /**
    * List all objects for a given prefix
-   * @param {string} prefix 
+   * @param {string} prefix
    */
   async listObjects(prefix = '') {
     if (this.mode === 'aws' && this.s3Client) {
@@ -151,7 +153,7 @@ class StorageService {
         Prefix: prefix,
       });
       const response = await this.s3Client.send(command);
-      return (response.Contents || []).map(obj => ({
+      return (response.Contents || []).map((obj) => ({
         key: obj.Key,
         size: obj.Size,
         lastModified: obj.LastModified,
@@ -159,7 +161,7 @@ class StorageService {
     } else {
       const results = [];
       const baseDir = path.join(this.localStorageDir, prefix);
-      
+
       const scanDir = (currentDir, relativePrefix) => {
         if (!fs.existsSync(currentDir)) return;
         const entries = fs.readdirSync(currentDir, { withFileTypes: true });
@@ -184,7 +186,7 @@ class StorageService {
       } else {
         scanDir(this.localStorageDir, '');
       }
-      return results.filter(item => item.key.startsWith(prefix));
+      return results.filter((item) => item.key.startsWith(prefix));
     }
   }
 
@@ -195,23 +197,23 @@ class StorageService {
    */
   async uploadDirectory(sourceDir, destinationPrefix, onFileUploaded) {
     const uploadedFiles = [];
-    
+
     const walkAndUpload = async (currentDir, relativePath = '') => {
       const entries = fs.readdirSync(currentDir, { withFileTypes: true });
       for (const entry of entries) {
         const fullPath = path.join(currentDir, entry.name);
         const rel = path.join(relativePath, entry.name).replace(/\\/g, '/');
-        
+
         if (entry.isDirectory()) {
           await walkAndUpload(fullPath, rel);
         } else {
           const s3Key = `${destinationPrefix.replace(/\/$/, '')}/${rel}`;
           const content = fs.readFileSync(fullPath);
           const contentType = mime.lookup(fullPath) || 'application/octet-stream';
-          
+
           await this.putObject(s3Key, content, contentType);
           uploadedFiles.push({ key: s3Key, size: content.length, mimeType: contentType });
-          
+
           if (typeof onFileUploaded === 'function') {
             onFileUploaded(s3Key, content.length);
           }

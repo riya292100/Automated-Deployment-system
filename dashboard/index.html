@@ -1,603 +1,799 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Automated Deployment System | Cloud Orchestrator</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-</head>
-<body>
-  <!-- Ambient background glow elements -->
-  <div class="ambient-glow glow-1"></div>
-  <div class="ambient-glow glow-2"></div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Automated Deployment System | Cloud Orchestrator</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <!-- Ambient background glow elements -->
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
 
-  <div class="app-layout">
-    <!-- Sidebar Navigation -->
-    <aside class="sidebar">
-      <div class="brand">
-        <div class="brand-icon">⚡</div>
-        <div class="brand-text">
-          <span class="brand-title">AutoDeploy</span>
-          <span class="brand-badge">AWS • ECS • S3</span>
-        </div>
-      </div>
-
-      <nav class="nav-menu">
-        <button class="nav-item active" data-tab="overview">
-          <span class="nav-icon">📊</span>
-          <span>Deployments</span>
-        </button>
-        <button class="nav-item" data-tab="architecture">
-          <span class="nav-icon">🗺️</span>
-          <span>Architecture & DFD</span>
-        </button>
-        <button class="nav-item" data-tab="terminal">
-          <span class="nav-icon">💻</span>
-          <span>Live Terminal</span>
-          <span class="badge-pulse" id="terminal-pulse" style="display: none;">●</span>
-        </button>
-        <button class="nav-item" data-tab="preview">
-          <span class="nav-icon">👁️</span>
-          <span>Site Preview</span>
-        </button>
-        <button class="nav-item" data-tab="settings">
-          <span class="nav-icon">⚙️</span>
-          <span>Cloud Settings</span>
-        </button>
-      </nav>
-
-      <div class="system-status-box">
-        <div class="status-header">
-          <span class="status-dot online"></span>
-          <span class="status-text">Pipeline Online</span>
-        </div>
-        <div class="status-meta">
-          <div class="meta-row"><span>S3 Storage:</span> <strong id="storage-status-tag">Local S3</strong></div>
-          <div class="meta-row"><span>Redis Cache:</span> <strong id="redis-status-tag">Active (0.4ms)</strong></div>
-          <div class="meta-row"><span>ECS Worker:</span> <strong>Fargate</strong></div>
-        </div>
-      </div>
-    </aside>
-
-    <!-- Main Content Area -->
-    <main class="main-content">
-      <!-- Top Bar -->
-      <header class="topbar">
-        <div class="page-info">
-          <h1 id="page-title">Deployments & System Overview</h1>
-          <p id="page-desc">Manage containerized builds, S3 distributions, and edge reverse-proxy routing</p>
+    <div class="app-layout">
+      <!-- Sidebar Navigation -->
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-icon">⚡</div>
+          <div class="brand-text">
+            <span class="brand-title">AutoDeploy</span>
+            <span class="brand-badge">AWS • ECS • S3</span>
+          </div>
         </div>
 
-        <div class="topbar-actions">
-          <button class="btn btn-secondary" id="btn-health-check" onclick="app.checkHealth()">
-            <span>🔄 Health Check</span>
+        <nav class="nav-menu">
+          <button class="nav-item active" data-tab="overview">
+            <span class="nav-icon">📊</span>
+            <span>Deployments</span>
           </button>
-          <button class="btn btn-primary" id="btn-open-deploy-modal" onclick="app.openDeployModal()">
-            <span>🚀 New Deployment</span>
+          <button class="nav-item" data-tab="architecture">
+            <span class="nav-icon">🗺️</span>
+            <span>Architecture & DFD</span>
           </button>
-        </div>
-      </header>
+          <button class="nav-item" data-tab="terminal">
+            <span class="nav-icon">💻</span>
+            <span>Live Terminal</span>
+            <span class="badge-pulse" id="terminal-pulse" style="display: none">●</span>
+          </button>
+          <button class="nav-item" data-tab="preview">
+            <span class="nav-icon">👁️</span>
+            <span>Site Preview</span>
+          </button>
+          <button class="nav-item" data-tab="settings">
+            <span class="nav-icon">⚙️</span>
+            <span>Cloud Settings</span>
+          </button>
+        </nav>
 
-      <!-- TAB 1: OVERVIEW & DEPLOYMENTS -->
-      <section id="tab-overview" class="tab-panel active">
-        <!-- Telemetry KPIs -->
-        <div class="kpi-grid">
-          <div class="kpi-card">
-            <div class="kpi-icon-wrap icon-blue">🚀</div>
-            <div class="kpi-data">
-              <div class="kpi-label">Total Deployments</div>
-              <div class="kpi-value" id="kpi-total-deploys">0</div>
-            </div>
+        <div class="system-status-box">
+          <div class="status-header">
+            <span class="status-dot online"></span>
+            <span class="status-text">Pipeline Online</span>
           </div>
-
-          <div class="kpi-card">
-            <div class="kpi-icon-wrap icon-green">✔</div>
-            <div class="kpi-data">
-              <div class="kpi-label">Active Live Projects</div>
-              <div class="kpi-value" id="kpi-active-projects">0</div>
+          <div class="status-meta">
+            <div class="meta-row">
+              <span>S3 Storage:</span> <strong id="storage-status-tag">Local S3</strong>
             </div>
-          </div>
-
-          <div class="kpi-card">
-            <div class="kpi-icon-wrap icon-purple">⏱️</div>
-            <div class="kpi-data">
-              <div class="kpi-label">Avg Build Time</div>
-              <div class="kpi-value" id="kpi-avg-build-time">0.0s</div>
+            <div class="meta-row">
+              <span>Redis Cache:</span> <strong id="redis-status-tag">Active (0.4ms)</strong>
             </div>
-          </div>
-
-          <div class="kpi-card">
-            <div class="kpi-icon-wrap icon-cyan">📦</div>
-            <div class="kpi-data">
-              <div class="kpi-label">S3 Storage Used</div>
-              <div class="kpi-value" id="kpi-storage-used">0.0 MB</div>
-            </div>
-          </div>
-
-          <div class="kpi-card">
-            <div class="kpi-icon-wrap icon-amber">⚡</div>
-            <div class="kpi-data">
-              <div class="kpi-label">Cache Hit Rate</div>
-              <div class="kpi-value" id="kpi-cache-hit">99.8%</div>
-            </div>
+            <div class="meta-row"><span>ECS Worker:</span> <strong>Fargate</strong></div>
           </div>
         </div>
+      </aside>
 
-        <!-- 1-Click Quick Deploy Starter Cards -->
-        <div class="quick-deploy-section">
-          <div class="section-heading">
-            <h2>⚡ Instant 1-Click Sandbox Starters</h2>
-            <p>Deploy pre-configured production templates into S3 & Reverse Proxy in seconds</p>
+      <!-- Main Content Area -->
+      <main class="main-content">
+        <!-- Top Bar -->
+        <header class="topbar">
+          <div class="page-info">
+            <h1 id="page-title">Deployments & System Overview</h1>
+            <p id="page-desc">
+              Manage containerized builds, S3 distributions, and edge reverse-proxy routing
+            </p>
           </div>
-          <div class="template-cards-grid">
-            <div class="template-card" onclick="app.quickDeploy('modern-landing-page', 'Nexus Cloud Landing')">
-              <div class="template-icon">🌐</div>
-              <div class="template-body">
-                <h3>Nexus Cloud Landing</h3>
-                <p>High-converting HTML5/CSS3 landing page with dark theme and animations.</p>
-                <div class="template-tags">
-                  <span>HTML5</span><span>CSS3</span><span>Vanilla JS</span>
+
+          <div class="topbar-actions">
+            <button class="btn btn-secondary" id="btn-health-check" onclick="app.checkHealth()">
+              <span>🔄 Health Check</span>
+            </button>
+            <button
+              class="btn btn-primary"
+              id="btn-open-deploy-modal"
+              onclick="app.openDeployModal()"
+            >
+              <span>🚀 New Deployment</span>
+            </button>
+          </div>
+        </header>
+
+        <!-- TAB 1: OVERVIEW & DEPLOYMENTS -->
+        <section id="tab-overview" class="tab-panel active">
+          <!-- Telemetry KPIs -->
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-icon-wrap icon-blue">🚀</div>
+              <div class="kpi-data">
+                <div class="kpi-label">Total Deployments</div>
+                <div class="kpi-value" id="kpi-total-deploys">0</div>
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-icon-wrap icon-green">✔</div>
+              <div class="kpi-data">
+                <div class="kpi-label">Active Live Projects</div>
+                <div class="kpi-value" id="kpi-active-projects">0</div>
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-icon-wrap icon-purple">⏱️</div>
+              <div class="kpi-data">
+                <div class="kpi-label">Avg Build Time</div>
+                <div class="kpi-value" id="kpi-avg-build-time">0.0s</div>
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-icon-wrap icon-cyan">📦</div>
+              <div class="kpi-data">
+                <div class="kpi-label">S3 Storage Used</div>
+                <div class="kpi-value" id="kpi-storage-used">0.0 MB</div>
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-icon-wrap icon-amber">⚡</div>
+              <div class="kpi-data">
+                <div class="kpi-label">Cache Hit Rate</div>
+                <div class="kpi-value" id="kpi-cache-hit">99.8%</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 1-Click Quick Deploy Starter Cards -->
+          <div class="quick-deploy-section">
+            <div class="section-heading">
+              <h2>⚡ Instant 1-Click Sandbox Starters</h2>
+              <p>Deploy pre-configured production templates into S3 & Reverse Proxy in seconds</p>
+            </div>
+            <div class="template-cards-grid">
+              <div
+                class="template-card"
+                onclick="app.quickDeploy('modern-landing-page', 'Nexus Cloud Landing')"
+              >
+                <div class="template-icon">🌐</div>
+                <div class="template-body">
+                  <h3>Nexus Cloud Landing</h3>
+                  <p>High-converting HTML5/CSS3 landing page with dark theme and animations.</p>
+                  <div class="template-tags">
+                    <span>HTML5</span><span>CSS3</span><span>Vanilla JS</span>
+                  </div>
+                </div>
+                <button class="btn btn-sm btn-outline">Deploy Now &rarr;</button>
+              </div>
+
+              <div
+                class="template-card"
+                onclick="app.quickDeploy('react-vite-app', 'Enterprise React SPA')"
+              >
+                <div class="template-icon">⚛️</div>
+                <div class="template-body">
+                  <h3>Enterprise React App</h3>
+                  <p>Single Page Application with live state counters and modular routing.</p>
+                  <div class="template-tags">
+                    <span>React</span><span>SPA</span><span>Vite</span>
+                  </div>
+                </div>
+                <button class="btn btn-sm btn-outline">Deploy Now &rarr;</button>
+              </div>
+
+              <div
+                class="template-card"
+                onclick="app.quickDeploy('analytics-dashboard', 'Cloud Metrics Dashboard')"
+              >
+                <div class="template-icon">📈</div>
+                <div class="template-body">
+                  <h3>Telemetry Dashboard</h3>
+                  <p>Real-time telemetry dashboard with event streams and request logs.</p>
+                  <div class="template-tags">
+                    <span>Analytics</span><span>Dashboard</span><span>Charts</span>
+                  </div>
+                </div>
+                <button class="btn btn-sm btn-outline">Deploy Now &rarr;</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Deployments History Table -->
+          <div class="content-panel">
+            <div class="panel-header">
+              <div>
+                <h2>Deployment Pipeline History</h2>
+                <p class="panel-subtitle">
+                  Real-time status of all container builds, S3 distribution links, and duration
+                  metrics
+                </p>
+              </div>
+              <button class="btn btn-sm btn-secondary" onclick="app.loadDeployments()">
+                Refresh
+              </button>
+            </div>
+
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Project / Slug</th>
+                    <th>Status</th>
+                    <th>Source / Commit</th>
+                    <th>Duration</th>
+                    <th>Assets</th>
+                    <th>Deployed At</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="deployments-table-body">
+                  <tr>
+                    <td colspan="7" class="text-center empty-state">
+                      <div class="empty-box">
+                        <span class="empty-icon">📦</span>
+                        <p>
+                          No deployments yet. Click <strong>"New Deployment"</strong> or choose a
+                          1-Click Starter above to launch!
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 2: SYSTEM ARCHITECTURE & DFD VISUALIZER -->
+        <section id="tab-architecture" class="tab-panel">
+          <div class="content-panel">
+            <div class="panel-header">
+              <div>
+                <h2>Interactive Architecture, HLD & DFD Visualizer</h2>
+                <p class="panel-subtitle">
+                  Real-time data flow diagram mapping Developer commits to AWS ECS, Redis, S3, and
+                  Edge Proxy
+                </p>
+              </div>
+              <div class="architecture-controls">
+                <button class="btn btn-sm btn-primary" onclick="app.simulateArchitectureFlow()">
+                  ▶ Simulate Packet Flow
+                </button>
+              </div>
+            </div>
+
+            <!-- Architecture Visual Map -->
+            <div class="architecture-canvas">
+              <div class="arch-flow">
+                <!-- Node 1: Developer -->
+                <div class="arch-node" id="node-dev">
+                  <div class="node-icon">👨‍💻</div>
+                  <div class="node-title">Developer</div>
+                  <div class="node-desc">Code Commit / Push</div>
+                  <div class="node-badge">Git Client</div>
+                </div>
+
+                <div class="arch-connector" id="conn-1">
+                  <div class="packet"></div>
+                  <span class="connector-label">git push</span>
+                </div>
+
+                <!-- Node 2: Version Control & API Server -->
+                <div class="arch-node" id="node-api">
+                  <div class="node-icon">🛡️</div>
+                  <div class="node-title">API Server</div>
+                  <div class="node-desc">Port 9000 Orchestrator</div>
+                  <div class="node-badge status-live">ONLINE</div>
+                </div>
+
+                <div class="arch-connector" id="conn-2">
+                  <div class="packet"></div>
+                  <span class="connector-label">dispatch build</span>
+                </div>
+
+                <!-- Node 3: Build Worker (Docker / ECS) -->
+                <div class="arch-node" id="node-builder">
+                  <div class="node-icon">🐳</div>
+                  <div class="node-title">Build Worker</div>
+                  <div class="node-desc">AWS ECS / Docker</div>
+                  <div class="node-badge status-live">ACTIVE</div>
+                </div>
+
+                <div class="arch-connector" id="conn-3">
+                  <div class="packet"></div>
+                  <span class="connector-label">upload artifacts</span>
+                </div>
+
+                <!-- Node 4: S3 Bucket Storage -->
+                <div class="arch-node" id="node-s3">
+                  <div class="node-icon">🪣</div>
+                  <div class="node-title">Amazon S3</div>
+                  <div class="node-desc">Static Asset Store</div>
+                  <div class="node-badge status-live" id="arch-s3-badge">STORED</div>
+                </div>
+
+                <div class="arch-connector" id="conn-4">
+                  <div class="packet"></div>
+                  <span class="connector-label">fetch assets</span>
+                </div>
+
+                <!-- Node 5: S3 Reverse Proxy -->
+                <div class="arch-node" id="node-proxy">
+                  <div class="node-icon">🌐</div>
+                  <div class="node-title">Reverse Proxy</div>
+                  <div class="node-desc">Port 8000 Edge Router</div>
+                  <div class="node-badge status-live">ONLINE</div>
+                </div>
+
+                <div class="arch-connector" id="conn-5">
+                  <div class="packet"></div>
+                  <span class="connector-label">serve HTTP</span>
+                </div>
+
+                <!-- Node 6: End User -->
+                <div class="arch-node" id="node-client">
+                  <div class="node-icon">🌍</div>
+                  <div class="node-title">End User</div>
+                  <div class="node-desc">Zero-Latency Web</div>
+                  <div class="node-badge">200 OK</div>
                 </div>
               </div>
-              <button class="btn btn-sm btn-outline">Deploy Now &rarr;</button>
-            </div>
 
-            <div class="template-card" onclick="app.quickDeploy('react-vite-app', 'Enterprise React SPA')">
-              <div class="template-icon">⚛️</div>
-              <div class="template-body">
-                <h3>Enterprise React App</h3>
-                <p>Single Page Application with live state counters and modular routing.</p>
-                <div class="template-tags">
-                  <span>React</span><span>SPA</span><span>Vite</span>
-                </div>
-              </div>
-              <button class="btn btn-sm btn-outline">Deploy Now &rarr;</button>
-            </div>
-
-            <div class="template-card" onclick="app.quickDeploy('analytics-dashboard', 'Cloud Metrics Dashboard')">
-              <div class="template-icon">📈</div>
-              <div class="template-body">
-                <h3>Telemetry Dashboard</h3>
-                <p>Real-time telemetry dashboard with event streams and request logs.</p>
-                <div class="template-tags">
-                  <span>Analytics</span><span>Dashboard</span><span>Charts</span>
-                </div>
-              </div>
-              <button class="btn btn-sm btn-outline">Deploy Now &rarr;</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Deployments History Table -->
-        <div class="content-panel">
-          <div class="panel-header">
-            <div>
-              <h2>Deployment Pipeline History</h2>
-              <p class="panel-subtitle">Real-time status of all container builds, S3 distribution links, and duration metrics</p>
-            </div>
-            <button class="btn btn-sm btn-secondary" onclick="app.loadDeployments()">Refresh</button>
-          </div>
-
-          <div class="table-responsive">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Project / Slug</th>
-                  <th>Status</th>
-                  <th>Source / Commit</th>
-                  <th>Duration</th>
-                  <th>Assets</th>
-                  <th>Deployed At</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="deployments-table-body">
-                <tr>
-                  <td colspan="7" class="text-center empty-state">
-                    <div class="empty-box">
-                      <span class="empty-icon">📦</span>
-                      <p>No deployments yet. Click <strong>"New Deployment"</strong> or choose a 1-Click Starter above to launch!</p>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <!-- TAB 2: SYSTEM ARCHITECTURE & DFD VISUALIZER -->
-      <section id="tab-architecture" class="tab-panel">
-        <div class="content-panel">
-          <div class="panel-header">
-            <div>
-              <h2>Interactive Architecture, HLD & DFD Visualizer</h2>
-              <p class="panel-subtitle">Real-time data flow diagram mapping Developer commits to AWS ECS, Redis, S3, and Edge Proxy</p>
-            </div>
-            <div class="architecture-controls">
-              <button class="btn btn-sm btn-primary" onclick="app.simulateArchitectureFlow()">▶ Simulate Packet Flow</button>
-            </div>
-          </div>
-
-          <!-- Architecture Visual Map -->
-          <div class="architecture-canvas">
-            <div class="arch-flow">
-              <!-- Node 1: Developer -->
-              <div class="arch-node" id="node-dev">
-                <div class="node-icon">👨‍💻</div>
-                <div class="node-title">Developer</div>
-                <div class="node-desc">Code Commit / Push</div>
-                <div class="node-badge">Git Client</div>
-              </div>
-
-              <div class="arch-connector" id="conn-1">
-                <div class="packet"></div>
-                <span class="connector-label">git push</span>
-              </div>
-
-              <!-- Node 2: Version Control & API Server -->
-              <div class="arch-node" id="node-api">
-                <div class="node-icon">🛡️</div>
-                <div class="node-title">API Server</div>
-                <div class="node-desc">Port 9000 Orchestrator</div>
-                <div class="node-badge status-live">ONLINE</div>
-              </div>
-
-              <div class="arch-connector" id="conn-2">
-                <div class="packet"></div>
-                <span class="connector-label">dispatch build</span>
-              </div>
-
-              <!-- Node 3: Build Worker (Docker / ECS) -->
-              <div class="arch-node" id="node-builder">
-                <div class="node-icon">🐳</div>
-                <div class="node-title">Build Worker</div>
-                <div class="node-desc">AWS ECS / Docker</div>
-                <div class="node-badge status-live">ACTIVE</div>
-              </div>
-
-              <div class="arch-connector" id="conn-3">
-                <div class="packet"></div>
-                <span class="connector-label">upload artifacts</span>
-              </div>
-
-              <!-- Node 4: S3 Bucket Storage -->
-              <div class="arch-node" id="node-s3">
-                <div class="node-icon">🪣</div>
-                <div class="node-title">Amazon S3</div>
-                <div class="node-desc">Static Asset Store</div>
-                <div class="node-badge status-live" id="arch-s3-badge">STORED</div>
-              </div>
-
-              <div class="arch-connector" id="conn-4">
-                <div class="packet"></div>
-                <span class="connector-label">fetch assets</span>
-              </div>
-
-              <!-- Node 5: S3 Reverse Proxy -->
-              <div class="arch-node" id="node-proxy">
-                <div class="node-icon">🌐</div>
-                <div class="node-title">Reverse Proxy</div>
-                <div class="node-desc">Port 8000 Edge Router</div>
-                <div class="node-badge status-live">ONLINE</div>
-              </div>
-
-              <div class="arch-connector" id="conn-5">
-                <div class="packet"></div>
-                <span class="connector-label">serve HTTP</span>
-              </div>
-
-              <!-- Node 6: End User -->
-              <div class="arch-node" id="node-client">
-                <div class="node-icon">🌍</div>
-                <div class="node-title">End User</div>
-                <div class="node-desc">Zero-Latency Web</div>
-                <div class="node-badge">200 OK</div>
-              </div>
-            </div>
-
-            <!-- Supporting Node: Redis Pub/Sub -->
-            <div class="arch-sub-layer">
-              <div class="arch-node sub-node" id="node-redis">
-                <div class="node-icon">⚡</div>
-                <div class="node-title">Redis Pub/Sub & Metadata Cache</div>
-                <div class="node-desc">Real-Time Terminal Streaming & Route Lookup</div>
-                <div class="node-badge status-live">0.4ms Latency</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Academic DFD & System Specifications Reference -->
-          <div class="spec-breakdown-grid">
-            <div class="spec-card">
-              <h3>📄 Level 0 DFD (Context Diagram)</h3>
-              <p>The Developer interacts with the unified Automated Deployment System which interfaces with Cloud Storage (S3) and distributes content to End-Users.</p>
-            </div>
-            <div class="spec-card">
-              <h3>⚙️ Level 1 DFD (Process Flow)</h3>
-              <p>1. Code Commit &rarr; 2. VCS Fetch &rarr; 3. Docker Container Build &rarr; 4. S3 Artifact Sync &rarr; 5. Redis Routing Table &rarr; 6. Reverse Proxy Delivery.</p>
-            </div>
-            <div class="spec-card">
-              <h3>🛡️ Security & Cloud Governance</h3>
-              <p>IAM role enforcement, isolated build workspaces, and Content-Type validation prevent unauthorized access and XSS payload contamination.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- TAB 3: LIVE TERMINAL -->
-      <section id="tab-terminal" class="tab-panel">
-        <div class="terminal-layout">
-          <!-- Left: Build Stepper & Meta -->
-          <div class="terminal-sidebar">
-            <div class="panel-header-sm">
-              <h3>Build Stepper</h3>
-              <span class="badge" id="stepper-status-badge">STANDBY</span>
-            </div>
-
-            <div class="stepper-list">
-              <div class="step-item" id="step-1">
-                <div class="step-bullet">1</div>
-                <div class="step-content">
-                  <div class="step-title">Source Acquisition</div>
-                  <div class="step-desc">Cloning git repo or starter template</div>
-                </div>
-              </div>
-              <div class="step-item" id="step-2">
-                <div class="step-bullet">2</div>
-                <div class="step-content">
-                  <div class="step-title">Environment & Packages</div>
-                  <div class="step-desc">Resolving dependencies & npm packages</div>
-                </div>
-              </div>
-              <div class="step-item" id="step-3">
-                <div class="step-bullet">3</div>
-                <div class="step-content">
-                  <div class="step-title">Containerized Compilation</div>
-                  <div class="step-desc">Running build command & packaging dist</div>
-                </div>
-              </div>
-              <div class="step-item" id="step-4">
-                <div class="step-bullet">4</div>
-                <div class="step-content">
-                  <div class="step-title">S3 Storage Synchronization</div>
-                  <div class="step-desc">Uploading assets to S3 bucket</div>
-                </div>
-              </div>
-              <div class="step-item" id="step-5">
-                <div class="step-bullet">5</div>
-                <div class="step-content">
-                  <div class="step-title">Edge Routing & Reverse Proxy</div>
-                  <div class="step-desc">Registering subdomains in Redis cache</div>
+              <!-- Supporting Node: Redis Pub/Sub -->
+              <div class="arch-sub-layer">
+                <div class="arch-node sub-node" id="node-redis">
+                  <div class="node-icon">⚡</div>
+                  <div class="node-title">Redis Pub/Sub & Metadata Cache</div>
+                  <div class="node-desc">Real-Time Terminal Streaming & Route Lookup</div>
+                  <div class="node-badge status-live">0.4ms Latency</div>
                 </div>
               </div>
             </div>
 
-            <div class="terminal-meta-box">
-              <div class="meta-row"><span>Deployment ID:</span> <strong id="term-deploy-id">-</strong></div>
-              <div class="meta-row"><span>Project:</span> <strong id="term-project-slug">-</strong></div>
-              <div class="meta-row"><span>Elapsed Time:</span> <strong id="term-duration">0.0s</strong></div>
-            </div>
-
-            <div class="terminal-actions">
-              <button class="btn btn-sm btn-outline w-100" onclick="app.clearTerminal()">Clear Console</button>
-            </div>
-          </div>
-
-          <!-- Right: Live ANSI Terminal Console -->
-          <div class="terminal-main">
-            <div class="console-header">
-              <div class="console-dots">
-                <span class="dot red"></span>
-                <span class="dot yellow"></span>
-                <span class="dot green"></span>
+            <!-- Academic DFD & System Specifications Reference -->
+            <div class="spec-breakdown-grid">
+              <div class="spec-card">
+                <h3>📄 Level 0 DFD (Context Diagram)</h3>
+                <p>
+                  The Developer interacts with the unified Automated Deployment System which
+                  interfaces with Cloud Storage (S3) and distributes content to End-Users.
+                </p>
               </div>
-              <div class="console-title" id="console-title-text">terminal@autodeploy-ecs-worker: ~</div>
-              <div class="console-controls">
-                <button class="btn-console-tool" title="Copy Logs" onclick="app.copyLogs()">📋 Copy</button>
-                <button class="btn-console-tool" id="btn-auto-scroll" onclick="app.toggleAutoScroll()">📜 Auto-Scroll: ON</button>
+              <div class="spec-card">
+                <h3>⚙️ Level 1 DFD (Process Flow)</h3>
+                <p>
+                  1. Code Commit &rarr; 2. VCS Fetch &rarr; 3. Docker Container Build &rarr; 4. S3
+                  Artifact Sync &rarr; 5. Redis Routing Table &rarr; 6. Reverse Proxy Delivery.
+                </p>
+              </div>
+              <div class="spec-card">
+                <h3>🛡️ Security & Cloud Governance</h3>
+                <p>
+                  IAM role enforcement, isolated build workspaces, and Content-Type validation
+                  prevent unauthorized access and XSS payload contamination.
+                </p>
               </div>
             </div>
-            <div class="console-body" id="terminal-stream">
-              <div class="log-line system">[System] Automated Deployment System Terminal Ready.</div>
-              <div class="log-line dim">Waiting for deployment task dispatch...</div>
+          </div>
+        </section>
+
+        <!-- TAB 3: LIVE TERMINAL -->
+        <section id="tab-terminal" class="tab-panel">
+          <div class="terminal-layout">
+            <!-- Left: Build Stepper & Meta -->
+            <div class="terminal-sidebar">
+              <div class="panel-header-sm">
+                <h3>Build Stepper</h3>
+                <span class="badge" id="stepper-status-badge">STANDBY</span>
+              </div>
+
+              <div class="stepper-list">
+                <div class="step-item" id="step-1">
+                  <div class="step-bullet">1</div>
+                  <div class="step-content">
+                    <div class="step-title">Source Acquisition</div>
+                    <div class="step-desc">Cloning git repo or starter template</div>
+                  </div>
+                </div>
+                <div class="step-item" id="step-2">
+                  <div class="step-bullet">2</div>
+                  <div class="step-content">
+                    <div class="step-title">Environment & Packages</div>
+                    <div class="step-desc">Resolving dependencies & npm packages</div>
+                  </div>
+                </div>
+                <div class="step-item" id="step-3">
+                  <div class="step-bullet">3</div>
+                  <div class="step-content">
+                    <div class="step-title">Containerized Compilation</div>
+                    <div class="step-desc">Running build command & packaging dist</div>
+                  </div>
+                </div>
+                <div class="step-item" id="step-4">
+                  <div class="step-bullet">4</div>
+                  <div class="step-content">
+                    <div class="step-title">S3 Storage Synchronization</div>
+                    <div class="step-desc">Uploading assets to S3 bucket</div>
+                  </div>
+                </div>
+                <div class="step-item" id="step-5">
+                  <div class="step-bullet">5</div>
+                  <div class="step-content">
+                    <div class="step-title">Edge Routing & Reverse Proxy</div>
+                    <div class="step-desc">Registering subdomains in Redis cache</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="terminal-meta-box">
+                <div class="meta-row">
+                  <span>Deployment ID:</span> <strong id="term-deploy-id">-</strong>
+                </div>
+                <div class="meta-row">
+                  <span>Project:</span> <strong id="term-project-slug">-</strong>
+                </div>
+                <div class="meta-row">
+                  <span>Elapsed Time:</span> <strong id="term-duration">0.0s</strong>
+                </div>
+              </div>
+
+              <div class="terminal-actions">
+                <button class="btn btn-sm btn-outline w-100" onclick="app.clearTerminal()">
+                  Clear Console
+                </button>
+              </div>
+            </div>
+
+            <!-- Right: Live ANSI Terminal Console -->
+            <div class="terminal-main">
+              <div class="console-header">
+                <div class="console-dots">
+                  <span class="dot red"></span>
+                  <span class="dot yellow"></span>
+                  <span class="dot green"></span>
+                </div>
+                <div class="console-title" id="console-title-text">
+                  terminal@autodeploy-ecs-worker: ~
+                </div>
+                <div class="console-controls">
+                  <button class="btn-console-tool" title="Copy Logs" onclick="app.copyLogs()">
+                    📋 Copy
+                  </button>
+                  <button
+                    class="btn-console-tool"
+                    id="btn-auto-scroll"
+                    onclick="app.toggleAutoScroll()"
+                  >
+                    📜 Auto-Scroll: ON
+                  </button>
+                </div>
+              </div>
+              <div class="console-body" id="terminal-stream">
+                <div class="log-line system">
+                  [System] Automated Deployment System Terminal Ready.
+                </div>
+                <div class="log-line dim">Waiting for deployment task dispatch...</div>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- TAB 4: SITE PREVIEW -->
-      <section id="tab-preview" class="tab-panel">
-        <div class="preview-layout">
-          <div class="preview-toolbar">
-            <div class="preview-url-box">
-              <span class="url-badge">HTTPS</span>
-              <input type="text" id="preview-url-input" class="preview-input" value="http://localhost:8000" readonly>
+        <!-- TAB 4: SITE PREVIEW -->
+        <section id="tab-preview" class="tab-panel">
+          <div class="preview-layout">
+            <div class="preview-toolbar">
+              <div class="preview-url-box">
+                <span class="url-badge">HTTPS</span>
+                <input
+                  type="text"
+                  id="preview-url-input"
+                  class="preview-input"
+                  value="http://localhost:8000"
+                  readonly
+                />
+              </div>
+              <div class="preview-device-switch">
+                <button
+                  class="device-btn active"
+                  data-width="100%"
+                  onclick="app.setDeviceWidth('100%', this)"
+                >
+                  🖥️ Desktop
+                </button>
+                <button
+                  class="device-btn"
+                  data-width="768px"
+                  onclick="app.setDeviceWidth('768px', this)"
+                >
+                  📱 Tablet
+                </button>
+                <button
+                  class="device-btn"
+                  data-width="375px"
+                  onclick="app.setDeviceWidth('375px', this)"
+                >
+                  📱 Mobile
+                </button>
+              </div>
+              <div class="preview-actions">
+                <button class="btn btn-sm btn-secondary" onclick="app.reloadPreview()">
+                  🔄 Refresh
+                </button>
+                <a
+                  href="#"
+                  id="preview-external-link"
+                  target="_blank"
+                  class="btn btn-sm btn-primary"
+                  >Open in New Tab ↗</a
+                >
+              </div>
             </div>
-            <div class="preview-device-switch">
-              <button class="device-btn active" data-width="100%" onclick="app.setDeviceWidth('100%', this)">🖥️ Desktop</button>
-              <button class="device-btn" data-width="768px" onclick="app.setDeviceWidth('768px', this)">📱 Tablet</button>
-              <button class="device-btn" data-width="375px" onclick="app.setDeviceWidth('375px', this)">📱 Mobile</button>
-            </div>
-            <div class="preview-actions">
-              <button class="btn btn-sm btn-secondary" onclick="app.reloadPreview()">🔄 Refresh</button>
-              <a href="#" id="preview-external-link" target="_blank" class="btn btn-sm btn-primary">Open in New Tab ↗</a>
+
+            <div class="preview-frame-container">
+              <iframe
+                id="site-preview-iframe"
+                src="about:blank"
+                title="Live Deployed Site Preview"
+              ></iframe>
             </div>
           </div>
+        </section>
 
-          <div class="preview-frame-container">
-            <iframe id="site-preview-iframe" src="about:blank" title="Live Deployed Site Preview"></iframe>
-          </div>
-        </div>
-      </section>
-
-      <!-- TAB 5: CLOUD SETTINGS -->
-      <section id="tab-settings" class="tab-panel">
-        <div class="content-panel max-w-700">
-          <div class="panel-header">
-            <div>
-              <h2>Cloud Infrastructure & Storage Configuration</h2>
-              <p class="panel-subtitle">Configure AWS S3 credentials, AWS ECS cluster settings, and Redis endpoints</p>
-            </div>
-          </div>
-
-          <form id="settings-form" onsubmit="app.saveSettings(event)">
-            <div class="form-group">
-              <label class="form-label">Storage Backend Mode</label>
-              <select id="setting-storage-mode" class="form-control" onchange="app.onStorageModeChange()">
-                <option value="local">Local S3 High-Speed Emulation (Offline / Zero-Config)</option>
-                <option value="aws">AWS Cloud Mode (Real S3 Bucket + ECS Fargate)</option>
-              </select>
-              <span class="form-hint">Local emulation creates S3-compatible key hierarchies with instant response times.</span>
+        <!-- TAB 5: CLOUD SETTINGS -->
+        <section id="tab-settings" class="tab-panel">
+          <div class="content-panel max-w-700">
+            <div class="panel-header">
+              <div>
+                <h2>Cloud Infrastructure & Storage Configuration</h2>
+                <p class="panel-subtitle">
+                  Configure AWS S3 credentials, AWS ECS cluster settings, and Redis endpoints
+                </p>
+              </div>
             </div>
 
-            <div id="aws-credentials-group" style="display: none;">
+            <form id="settings-form" onsubmit="app.saveSettings(event)">
               <div class="form-group">
-                <label class="form-label">AWS S3 Bucket Name</label>
-                <input type="text" id="setting-s3-bucket" class="form-control" placeholder="my-automated-deployment-bucket">
+                <label class="form-label">Storage Backend Mode</label>
+                <select
+                  id="setting-storage-mode"
+                  class="form-control"
+                  onchange="app.onStorageModeChange()"
+                >
+                  <option value="local">
+                    Local S3 High-Speed Emulation (Offline / Zero-Config)
+                  </option>
+                  <option value="aws">AWS Cloud Mode (Real S3 Bucket + ECS Fargate)</option>
+                </select>
+                <span class="form-hint"
+                  >Local emulation creates S3-compatible key hierarchies with instant response
+                  times.</span
+                >
               </div>
 
-              <div class="form-row">
-                <div class="form-group col">
-                  <label class="form-label">AWS Region</label>
-                  <input type="text" id="setting-aws-region" class="form-control" value="us-east-1">
+              <div id="aws-credentials-group" style="display: none">
+                <div class="form-group">
+                  <label class="form-label">AWS S3 Bucket Name</label>
+                  <input
+                    type="text"
+                    id="setting-s3-bucket"
+                    class="form-control"
+                    placeholder="my-automated-deployment-bucket"
+                  />
                 </div>
-                <div class="form-group col">
-                  <label class="form-label">AWS ECS Cluster Name</label>
-                  <input type="text" id="setting-ecs-cluster" class="form-control" value="production-cluster">
-                </div>
-              </div>
 
-              <div class="form-row">
-                <div class="form-group col">
-                  <label class="form-label">AWS Access Key ID</label>
-                  <input type="password" id="setting-aws-key" class="form-control" placeholder="AKIAIOSFODNN7EXAMPLE">
-                </div>
-                <div class="form-group col">
-                  <label class="form-label">AWS Secret Access Key</label>
-                  <input type="password" id="setting-aws-secret" class="form-control" placeholder="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY">
-                </div>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Redis Connection URI</label>
-              <input type="text" id="setting-redis-url" class="form-control" value="redis://localhost:6379" placeholder="redis://localhost:6379">
-              <span class="form-hint">If no external Redis server is running, the system utilizes the high-performance in-memory cache automatically.</span>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">S3 Reverse Proxy Host</label>
-              <input type="text" class="form-control" value="http://localhost:8000" readonly>
-            </div>
-
-            <div class="form-actions">
-              <button type="submit" class="btn btn-primary">Save Infrastructure Configuration</button>
-            </div>
-          </form>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <!-- DEPLOYMENT MODAL WIZARD -->
-  <div class="modal-backdrop" id="deploy-modal">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h2>🚀 Launch New Deployment</h2>
-        <button class="modal-close" onclick="app.closeDeployModal()">&times;</button>
-      </div>
-
-      <form id="deploy-form" onsubmit="app.submitDeployment(event)">
-        <div class="modal-body">
-          <div class="deploy-type-toggle">
-            <button type="button" class="toggle-tab active" id="tab-btn-template" onclick="app.setDeployType('template')">
-              ⭐ 1-Click Starter Template
-            </button>
-            <button type="button" class="toggle-tab" id="tab-btn-git" onclick="app.setDeployType('git')">
-              🐙 Custom Git Repository
-            </button>
-          </div>
-
-          <!-- Section A: Starter Template Select -->
-          <div id="section-template-select">
-            <div class="form-group">
-              <label class="form-label">Choose Starter Project</label>
-              <div class="template-radio-group">
-                <label class="radio-card active">
-                  <input type="radio" name="templateChoice" value="modern-landing-page" checked>
-                  <div class="radio-card-body">
-                    <strong>🌐 Nexus Cloud Landing</strong>
-                    <span>Modern dark-theme landing page with animations</span>
+                <div class="form-row">
+                  <div class="form-group col">
+                    <label class="form-label">AWS Region</label>
+                    <input
+                      type="text"
+                      id="setting-aws-region"
+                      class="form-control"
+                      value="us-east-1"
+                    />
                   </div>
-                </label>
-                <label class="radio-card">
-                  <input type="radio" name="templateChoice" value="react-vite-app">
-                  <div class="radio-card-body">
-                    <strong>⚛️ Enterprise React SPA</strong>
-                    <span>Interactive Single Page App with state counters</span>
+                  <div class="form-group col">
+                    <label class="form-label">AWS ECS Cluster Name</label>
+                    <input
+                      type="text"
+                      id="setting-ecs-cluster"
+                      class="form-control"
+                      value="production-cluster"
+                    />
                   </div>
-                </label>
-                <label class="radio-card">
-                  <input type="radio" name="templateChoice" value="analytics-dashboard">
-                  <div class="radio-card-body">
-                    <strong>📈 Cloud Telemetry Dashboard</strong>
-                    <span>Real-time SaaS analytics and request logs</span>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group col">
+                    <label class="form-label">AWS Access Key ID</label>
+                    <input
+                      type="password"
+                      id="setting-aws-key"
+                      class="form-control"
+                      placeholder="AKIAIOSFODNN7EXAMPLE"
+                    />
                   </div>
-                </label>
+                  <div class="form-group col">
+                    <label class="form-label">AWS Secret Access Key</label>
+                    <input
+                      type="password"
+                      id="setting-aws-secret"
+                      class="form-control"
+                      placeholder="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
 
-          <!-- Section B: Custom Git Input -->
-          <div id="section-git-input" style="display: none;">
-            <div class="form-group">
-              <label class="form-label">Git Repository URL</label>
-              <input type="url" id="deploy-git-url" class="form-control" placeholder="https://github.com/username/my-awesome-app">
-              <span class="form-hint">Public GitHub, GitLab, or Bitbucket repository URL</span>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group col">
-                <label class="form-label">Branch</label>
-                <input type="text" id="deploy-git-branch" class="form-control" value="main">
+              <div class="form-group">
+                <label class="form-label">Redis Connection URI</label>
+                <input
+                  type="text"
+                  id="setting-redis-url"
+                  class="form-control"
+                  value="redis://localhost:6379"
+                  placeholder="redis://localhost:6379"
+                />
+                <span class="form-hint"
+                  >If no external Redis server is running, the system utilizes the high-performance
+                  in-memory cache automatically.</span
+                >
               </div>
-              <div class="form-group col">
-                <label class="form-label">Output Directory</label>
-                <input type="text" id="deploy-output-dir" class="form-control" value="dist" placeholder="dist, build, out, or .">
+
+              <div class="form-group">
+                <label class="form-label">S3 Reverse Proxy Host</label>
+                <input type="text" class="form-control" value="http://localhost:8000" readonly />
               </div>
-            </div>
 
-            <div class="form-group">
-              <label class="form-label">Build Command (Optional)</label>
-              <input type="text" id="deploy-build-cmd" class="form-control" placeholder="npm run build">
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Install Command (Optional)</label>
-              <input type="text" id="deploy-install-cmd" class="form-control" placeholder="npm install">
-            </div>
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                  Save Infrastructure Configuration
+                </button>
+              </div>
+            </form>
           </div>
-
-          <!-- Common Project Name Slug -->
-          <div class="form-group">
-            <label class="form-label">Project Name / Custom Slug</label>
-            <input type="text" id="deploy-project-name" class="form-control" placeholder="e.g. my-ecommerce-store" required>
-            <span class="form-hint">Preview URL: <code id="slug-preview">http://localhost:8000/site/my-ecommerce-store/</code></span>
-          </div>
-        </div>
-
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="app.closeDeployModal()">Cancel</button>
-          <button type="submit" class="btn btn-primary" id="btn-submit-deploy">Start Deployment &rarr;</button>
-        </div>
-      </form>
+        </section>
+      </main>
     </div>
-  </div>
 
-  <script src="app.js"></script>
-</body>
+    <!-- DEPLOYMENT MODAL WIZARD -->
+    <div class="modal-backdrop" id="deploy-modal">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2>🚀 Launch New Deployment</h2>
+          <button class="modal-close" onclick="app.closeDeployModal()">&times;</button>
+        </div>
+
+        <form id="deploy-form" onsubmit="app.submitDeployment(event)">
+          <div class="modal-body">
+            <div class="deploy-type-toggle">
+              <button
+                type="button"
+                class="toggle-tab active"
+                id="tab-btn-template"
+                onclick="app.setDeployType('template')"
+              >
+                ⭐ 1-Click Starter Template
+              </button>
+              <button
+                type="button"
+                class="toggle-tab"
+                id="tab-btn-git"
+                onclick="app.setDeployType('git')"
+              >
+                🐙 Custom Git Repository
+              </button>
+            </div>
+
+            <!-- Section A: Starter Template Select -->
+            <div id="section-template-select">
+              <div class="form-group">
+                <label class="form-label">Choose Starter Project</label>
+                <div class="template-radio-group">
+                  <label class="radio-card active">
+                    <input type="radio" name="templateChoice" value="modern-landing-page" checked />
+                    <div class="radio-card-body">
+                      <strong>🌐 Nexus Cloud Landing</strong>
+                      <span>Modern dark-theme landing page with animations</span>
+                    </div>
+                  </label>
+                  <label class="radio-card">
+                    <input type="radio" name="templateChoice" value="react-vite-app" />
+                    <div class="radio-card-body">
+                      <strong>⚛️ Enterprise React SPA</strong>
+                      <span>Interactive Single Page App with state counters</span>
+                    </div>
+                  </label>
+                  <label class="radio-card">
+                    <input type="radio" name="templateChoice" value="analytics-dashboard" />
+                    <div class="radio-card-body">
+                      <strong>📈 Cloud Telemetry Dashboard</strong>
+                      <span>Real-time SaaS analytics and request logs</span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section B: Custom Git Input -->
+            <div id="section-git-input" style="display: none">
+              <div class="form-group">
+                <label class="form-label">Git Repository URL</label>
+                <input
+                  type="url"
+                  id="deploy-git-url"
+                  class="form-control"
+                  placeholder="https://github.com/username/my-awesome-app"
+                />
+                <span class="form-hint">Public GitHub, GitLab, or Bitbucket repository URL</span>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group col">
+                  <label class="form-label">Branch</label>
+                  <input type="text" id="deploy-git-branch" class="form-control" value="main" />
+                </div>
+                <div class="form-group col">
+                  <label class="form-label">Output Directory</label>
+                  <input
+                    type="text"
+                    id="deploy-output-dir"
+                    class="form-control"
+                    value="dist"
+                    placeholder="dist, build, out, or ."
+                  />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Build Command (Optional)</label>
+                <input
+                  type="text"
+                  id="deploy-build-cmd"
+                  class="form-control"
+                  placeholder="npm run build"
+                />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Install Command (Optional)</label>
+                <input
+                  type="text"
+                  id="deploy-install-cmd"
+                  class="form-control"
+                  placeholder="npm install"
+                />
+              </div>
+            </div>
+
+            <!-- Common Project Name Slug -->
+            <div class="form-group">
+              <label class="form-label">Project Name / Custom Slug</label>
+              <input
+                type="text"
+                id="deploy-project-name"
+                class="form-control"
+                placeholder="e.g. my-ecommerce-store"
+                required
+              />
+              <span class="form-hint"
+                >Preview URL:
+                <code id="slug-preview">http://localhost:8000/site/my-ecommerce-store/</code></span
+              >
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="app.closeDeployModal()">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary" id="btn-submit-deploy">
+              Start Deployment &rarr;
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="js/telemetry.js"></script>
+    <script src="js/terminal.js"></script>
+    <script src="js/deployments.js"></script>
+    <script src="js/architecture.js"></script>
+    <script src="js/preview.js"></script>
+    <script src="app.js"></script>
+  </body>
 </html>

@@ -8,7 +8,9 @@ class InMemoryRedis extends EventEmitter {
     this.logsHistory = new Map(); // deploymentId -> Array of logs
     this.expirations = new Map();
     this.isEmulated = true;
-    console.log('[Redis] Running in High-Performance In-Memory Emulation Mode (Zero configuration required)');
+    console.log(
+      '[Redis] Running in High-Performance In-Memory Emulation Mode (Zero configuration required)'
+    );
   }
 
   async ping() {
@@ -62,7 +64,7 @@ class InMemoryRedis extends EventEmitter {
     for (const [k, v] of hash.entries()) {
       try {
         result[k] = JSON.parse(v);
-      } catch (e) {
+      } catch (_e) {
         result[k] = v;
       }
     }
@@ -71,7 +73,7 @@ class InMemoryRedis extends EventEmitter {
 
   async publish(channel, message) {
     const msgString = typeof message === 'object' ? JSON.stringify(message) : String(message);
-    
+
     // Save log history if this is a log channel: logs:{id}
     if (channel.startsWith('logs:')) {
       const deployId = channel.replace('logs:', '');
@@ -80,7 +82,7 @@ class InMemoryRedis extends EventEmitter {
       }
       this.logsHistory.get(deployId).push({
         timestamp: new Date().toISOString(),
-        message: msgString
+        message: msgString,
       });
     }
 
@@ -105,7 +107,7 @@ class InMemoryRedis extends EventEmitter {
     const allKeys = Array.from(this.store.keys());
     if (pattern === '*') return allKeys;
     const regex = new RegExp('^' + pattern.replace(/\*/g, '.*') + '$');
-    return allKeys.filter(k => regex.test(k));
+    return allKeys.filter((k) => regex.test(k));
   }
 }
 

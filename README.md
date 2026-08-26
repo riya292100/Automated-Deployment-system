@@ -1,4 +1,5 @@
 # ⚡ Automated Deployment System
+
 > **Autonomous Cloud Deployment Platform using Docker, AWS ECS Fargate, Amazon S3, Redis, and Reverse Proxy**
 
 ![Platform Status](https://img.shields.io/badge/System-Healthy-10b981?style=for-the-badge)
@@ -10,7 +11,9 @@
 ---
 
 ## 📖 Executive Summary
+
 The **Automated Deployment System** is an end-to-end cloud platform engineered to simplify, accelerate, and automate the build and release lifecycle of modern web applications. Similar to architectures employed by Vercel and Render, the system seamlessly coordinates:
+
 - **API Server Orchestrator**: Manages build dispatch, deployments lifecycle, and Server-Sent Events (SSE) log streaming.
 - **Containerized Build Worker**: Executes Git cloning, package installation, compilation, and automated artifact extraction.
 - **Amazon S3 Storage**: Encapsulates and persists static production assets in isolated namespaces (`__outputs/{project-slug}/`).
@@ -57,16 +60,18 @@ The **Automated Deployment System** is an end-to-end cloud platform engineered t
 The system is equipped with high-performance zero-configuration local emulators for Amazon S3 and Redis, allowing you to run and test everything immediately out of the box.
 
 ### 1. Start All Services
+
 ```bash
 node start-all.js
 ```
 
 ### 2. Access the Applications
-| Service | URL | Description |
-| :--- | :--- | :--- |
-| **Cloud Dashboard** | `http://localhost:9000` | Deployment management, live terminal, and visualizer |
-| **S3 Reverse Proxy** | `http://localhost:8000` | Dynamic edge router and static asset CDN |
-| **API Endpoints** | `http://localhost:9000/api/*` | REST API, SSE streaming, and analytics |
+
+| Service              | URL                           | Description                                          |
+| :------------------- | :---------------------------- | :--------------------------------------------------- |
+| **Cloud Dashboard**  | `http://localhost:9000`       | Deployment management, live terminal, and visualizer |
+| **S3 Reverse Proxy** | `http://localhost:8000`       | Dynamic edge router and static asset CDN             |
+| **API Endpoints**    | `http://localhost:9000/api/*` | REST API, SSE streaming, and analytics               |
 
 ---
 
@@ -81,6 +86,7 @@ node tests/run-all-tests.js
 ```
 
 The test runner validates:
+
 1. **Storage Service**: Object put, get, binary integrity, MIME types, and folder synchronization.
 2. **Redis Service**: Ping, key-value storage, real-time Pub/Sub channels, and log history retention.
 3. **Build Worker**: Repository/template ingestion, compilation, S3 bucket upload, and route registration.
@@ -97,6 +103,7 @@ docker compose up --build
 ```
 
 Services defined in `docker-compose.yml`:
+
 - `api-server` (Port 9000)
 - `s3-reverse-proxy` (Port 8000)
 - `redis-service` (Port 6379)
@@ -120,7 +127,9 @@ To run directly against live AWS cloud resources:
 ## 📡 REST API Reference
 
 ### 1. Deploy Project
+
 `POST /api/deploy`
+
 ```json
 {
   "templateId": "modern-landing-page",
@@ -133,16 +142,19 @@ To run directly against live AWS cloud resources:
 ```
 
 ### 2. Live Log Stream (SSE)
+
 `GET /api/logs/:deploymentId`
-*Returns real-time Server-Sent Events (SSE) connected to Redis channel `logs:{deploymentId}`.*
+_Returns real-time Server-Sent Events (SSE) connected to Redis channel `logs:{deploymentId}`._
 
 ### 3. System Analytics
+
 `GET /api/analytics`
-*Returns system telemetry including active deployments, S3 bytes transferred, average build duration, and cache hit rates.*
+_Returns system telemetry including active deployments, S3 bytes transferred, average build duration, and cache hit rates._
 
 ### 4. Health Diagnostics
+
 `GET /api/health`
-*Returns health status of API Server, ECS Worker, S3 Storage, and Redis.*
+_Returns health status of API Server, ECS Worker, S3 Storage, and Redis._
 
 ---
 

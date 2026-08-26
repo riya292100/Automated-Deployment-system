@@ -19,9 +19,9 @@ app.use(express.json());
 app.use(express.static(path.resolve(__dirname, '../dashboard')));
 
 // Telemetry counters
-let totalDeploymentsCount = 0;
-let successfulDeploymentsCount = 0;
-let failedDeploymentsCount = 0;
+let _totalDeploymentsCount = 0;
+let _successfulDeploymentsCount = 0;
+let _failedDeploymentsCount = 0;
 const requestMetrics = {
   totalRequests: 0,
   endpoints: {},
@@ -56,11 +56,14 @@ app.post('/api/deploy', async (req, res) => {
 
     // Generate safe project slug
     let projectSlug = projectName
-      ? projectName.toLowerCase().replace(/[^a-z0-9-_]/g, '-').replace(/-+/g, '-')
-      : (templateId || 'app-' + Math.random().toString(36).substring(2, 7));
+      ? projectName
+          .toLowerCase()
+          .replace(/[^a-z0-9-_]/g, '-')
+          .replace(/-+/g, '-')
+      : templateId || 'app-' + Math.random().toString(36).substring(2, 7);
 
     const deploymentId = `dep-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`;
-    totalDeploymentsCount++;
+    _totalDeploymentsCount++;
 
     const payload = {
       deploymentId,
@@ -73,16 +76,19 @@ app.post('/api/deploy', async (req, res) => {
       outputDir,
     };
 
-    logger.info(`Received deployment request for [${projectSlug}] (ID: ${deploymentId})`, { payload });
+    logger.info(`Received deployment request for [${projectSlug}] (ID: ${deploymentId})`, {
+      payload,
+    });
 
     // Asynchronously dispatch build task
-    builder.executeBuild(payload)
+    builder
+      .executeBuild(payload)
       .then(() => {
-        successfulDeploymentsCount++;
+        _successfulDeploymentsCount++;
         logger.info(`Deployment ${deploymentId} finished successfully`);
       })
       .catch((err) => {
-        failedDeploymentsCount++;
+        _failedDeploymentsCount++;
         logger.error(`Deployment ${deploymentId} failed: ${err.message}`);
       });
 
@@ -103,7 +109,7 @@ app.post('/api/deploy', async (req, res) => {
       return res.status(400).json({
         error: 'Validation Error',
         message: 'Invalid input parameters for deployment',
-        issues: error.issues.map(i => ({ path: i.path.join('.'), message: i.message }))
+        issues: error.issues.map((i) => ({ path: i.path.join('.'), message: i.message })),
       });
     }
 
@@ -128,7 +134,9 @@ app.get('/api/logs/:deploymentId', (req, res) => {
   // 1. Immediately send past historical logs for this deployment
   const pastLogs = redis.getLogs(deploymentId);
   for (const logItem of pastLogs) {
-    res.write(`data: ${typeof logItem.message === 'string' ? logItem.message : JSON.stringify(logItem)}\n\n`);
+    res.write(
+      `data: ${typeof logItem.message === 'string' ? logItem.message : JSON.stringify(logItem)}\n\n`
+    );
   }
 
   // 2. Real-time Pub/Sub listener for new log events
@@ -160,7 +168,11 @@ app.get('/api/deployments', async (req, res) => {
     const raw = await redis.get('deployments:history');
     let history = [];
     if (raw) {
-      try { history = JSON.parse(raw); } catch (e) { history = []; }
+      try {
+        history = JSON.parse(raw);
+      } catch (_e) {
+        history = [];
+      }
     }
     res.json({ deployments: history });
   } catch (error) {
@@ -200,12 +212,15 @@ app.post('/api/deployments/:deploymentId/redeploy', async (req, res) => {
     }
     const old = typeof raw === 'string' ? JSON.parse(raw) : raw;
     const newDeploymentId = `dep-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`;
-    
+
     const payload = {
       deploymentId: newDeploymentId,
       projectSlug: old.projectSlug,
       gitUrl: old.gitUrl && !old.gitUrl.startsWith('template:') ? old.gitUrl : null,
-      templateId: old.gitUrl && old.gitUrl.startsWith('template:') ? old.gitUrl.replace('template:', '') : null,
+      templateId:
+        old.gitUrl && old.gitUrl.startsWith('template:')
+          ? old.gitUrl.replace('template:', '')
+          : null,
       branch: old.branch || 'main',
     };
 
@@ -236,19 +251,24 @@ app.get('/api/analytics', async (req, res) => {
     const rawHistory = await redis.get('deployments:history');
     let history = [];
     if (rawHistory) {
-      try { history = JSON.parse(rawHistory); } catch (e) { history = []; }
+      try {
+        history = JSON.parse(rawHistory);
+      } catch (_e) {
+        history = [];
+      }
     }
 
-    const readyDeploys = history.filter(d => d.status === 'READY');
+    const readyDeploys = history.filter((d) => d.status === 'READY');
     const totalDuration = readyDeploys.reduce((sum, d) => sum + (d.durationMs || 0), 0);
-    const avgBuildTimeMs = readyDeploys.length > 0 ? Math.round(totalDuration / readyDeploys.length) : 0;
+    const avgBuildTimeMs =
+      readyDeploys.length > 0 ? Math.round(totalDuration / readyDeploys.length) : 0;
     const totalBytes = readyDeploys.reduce((sum, d) => sum + (d.totalBytes || 0), 0);
 
     res.json({
       totalDeployments: history.length,
       successfulDeployments: readyDeploys.length,
-      failedDeployments: history.filter(d => d.status === 'FAILED').length,
-      activeProjects: new Set(history.map(d => d.projectSlug)).size,
+      failedDeployments: history.filter((d) => d.status === 'FAILED').length,
+      activeProjects: new Set(history.map((d) => d.projectSlug)).size,
       avgBuildTimeSeconds: (avgBuildTimeMs / 1000).toFixed(2),
       storageUsedBytes: totalBytes,
       storageUsedFormatted: (totalBytes / (1024 * 1024)).toFixed(2) + ' MB',
@@ -271,14 +291,18 @@ app.get('/api/metrics', async (req, res) => {
     const rawHistory = await redis.get('deployments:history');
     let history = [];
     if (rawHistory) {
-      try { history = JSON.parse(rawHistory); } catch (e) { history = []; }
+      try {
+        history = JSON.parse(rawHistory);
+      } catch (_e) {
+        history = [];
+      }
     }
 
     const metricsData = {
       uptime_seconds: Math.floor(process.uptime()),
       total_deployments_count: history.length,
-      successful_deployments_count: history.filter(d => d.status === 'READY').length,
-      failed_deployments_count: history.filter(d => d.status === 'FAILED').length,
+      successful_deployments_count: history.filter((d) => d.status === 'READY').length,
+      failed_deployments_count: history.filter((d) => d.status === 'FAILED').length,
       memory_heap_used_bytes: memory.heapUsed,
       memory_heap_total_bytes: memory.heapTotal,
       memory_rss_bytes: memory.rss,
@@ -312,10 +336,16 @@ app.get('/api/health', async (req, res) => {
     components: {
       apiServer: { status: 'ONLINE', port: PORT, uptime: process.uptime() },
       buildWorker: { status: 'ONLINE', mode: 'Containerized Worker' },
-      redisService: { status: redisPing === 'PONG' ? 'ONLINE' : 'DEGRADED', mode: redis.isEmulated ? 'High-Performance Emulation' : 'Connected Redis Cluster' },
-      s3Storage: { status: 'ONLINE', mode: storage.getMode() === 'aws' ? 'AWS S3 Cloud' : 'Local S3 Emulation' },
+      redisService: {
+        status: redisPing === 'PONG' ? 'ONLINE' : 'DEGRADED',
+        mode: redis.isEmulated ? 'High-Performance Emulation' : 'Connected Redis Cluster',
+      },
+      s3Storage: {
+        status: 'ONLINE',
+        mode: storage.getMode() === 'aws' ? 'AWS S3 Cloud' : 'Local S3 Emulation',
+      },
       ecsOrchestrator: { status: 'ONLINE', launchType: 'AWS Fargate / Docker' },
-    }
+    },
   });
 });
 
@@ -342,7 +372,9 @@ app.post('/api/config/storage', (req, res) => {
 
 if (require.main === module) {
   app.listen(PORT, () => {
-    logger.info(`Automated Deployment System API listening on port ${PORT} (http://localhost:${PORT})`);
+    logger.info(
+      `Automated Deployment System API listening on port ${PORT} (http://localhost:${PORT})`
+    );
   });
 }
 

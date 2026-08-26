@@ -34,9 +34,7 @@ describe('API Server & Reverse Proxy Integration', () => {
     });
 
     test('should return Prometheus formatted metrics when text/plain requested', async () => {
-      const res = await request(apiApp)
-        .get('/api/metrics')
-        .set('Accept', 'text/plain');
+      const res = await request(apiApp).get('/api/metrics').set('Accept', 'text/plain');
       expect(res.status).toBe(200);
       expect(res.text).toContain('autodeploy_uptime_seconds');
     });
@@ -44,9 +42,7 @@ describe('API Server & Reverse Proxy Integration', () => {
 
   describe('POST /api/deploy - Input Validation', () => {
     test('should reject deployment request when both gitUrl and templateId are missing', async () => {
-      const res = await request(apiApp)
-        .post('/api/deploy')
-        .send({ projectName: 'invalid-app' });
+      const res = await request(apiApp).post('/api/deploy').send({ projectName: 'invalid-app' });
 
       expect(res.status).toBe(400);
       expect(res.body.error).toBe('Validation Error');
@@ -54,24 +50,20 @@ describe('API Server & Reverse Proxy Integration', () => {
     });
 
     test('should reject deployment request with invalid project name characters', async () => {
-      const res = await request(apiApp)
-        .post('/api/deploy')
-        .send({
-          templateId: 'modern-landing-page',
-          projectName: 'invalid@app#name!'
-        });
+      const res = await request(apiApp).post('/api/deploy').send({
+        templateId: 'modern-landing-page',
+        projectName: 'invalid@app#name!',
+      });
 
       expect(res.status).toBe(400);
       expect(res.body.error).toBe('Validation Error');
     });
 
     test('should accept valid deployment request with templateId', async () => {
-      const res = await request(apiApp)
-        .post('/api/deploy')
-        .send({
-          templateId: 'modern-landing-page',
-          projectName: 'jest-api-app',
-        });
+      const res = await request(apiApp).post('/api/deploy').send({
+        templateId: 'modern-landing-page',
+        projectName: 'jest-api-app',
+      });
 
       expect(res.status).toBe(202);
       expect(res.body.success).toBe(true);
@@ -118,7 +110,7 @@ describe('API Server & Reverse Proxy Integration', () => {
     test('should establish SSE headers for log streaming', async () => {
       const server = apiApp.listen(0);
       const port = server.address().port;
-      
+
       await new Promise((resolve) => {
         const http = require('http');
         const req = http.get(`http://localhost:${port}/api/logs/dep-sse-test`, (res) => {
@@ -136,18 +128,14 @@ describe('API Server & Reverse Proxy Integration', () => {
 
   describe('POST /api/config/storage - Validation', () => {
     test('should reject invalid storage mode', async () => {
-      const res = await request(apiApp)
-        .post('/api/config/storage')
-        .send({ mode: 'invalid-mode' });
+      const res = await request(apiApp).post('/api/config/storage').send({ mode: 'invalid-mode' });
 
       expect(res.status).toBe(400);
       expect(res.body.error).toBe('Validation Error');
     });
 
     test('should accept valid storage mode update', async () => {
-      const res = await request(apiApp)
-        .post('/api/config/storage')
-        .send({ mode: 'local' });
+      const res = await request(apiApp).post('/api/config/storage').send({ mode: 'local' });
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);

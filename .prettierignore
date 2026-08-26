@@ -1,0 +1,7 @@
+node_modules/
+coverage/
+temp-builds/
+storage/
+package-lock.json
+sample-projects/
+.git/

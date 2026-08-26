@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { execSync, spawn } = require('child_process');
+const { execSync } = require('child_process');
 const storage = require('../shared/storage');
 const redis = require('../shared/redis-client');
 
@@ -52,8 +52,16 @@ class BuildWorker {
         branch,
       });
 
-      await this.log(deploymentId, `🚀 Initializing containerized build task for [${projectSlug}] (Task ID: ${deploymentId})`, 'system');
-      await this.log(deploymentId, `📍 Storage Mode: ${storage.getMode().toUpperCase()} | Target S3 Prefix: __outputs/${projectSlug}/`, 'system');
+      await this.log(
+        deploymentId,
+        `🚀 Initializing containerized build task for [${projectSlug}] (Task ID: ${deploymentId})`,
+        'system'
+      );
+      await this.log(
+        deploymentId,
+        `📍 Storage Mode: ${storage.getMode().toUpperCase()} | Target S3 Prefix: __outputs/${projectSlug}/`,
+        'system'
+      );
 
       // 2. Clone Git Repo or Copy Template
       await this.log(deploymentId, `\n📦 [Step 1/5] Acquiring source code...`, 'step');
@@ -63,54 +71,86 @@ class BuildWorker {
           throw new Error(`Sample template '${templateId}' not found.`);
         }
         await this.copyDirectory(templatePath, buildFolder);
-        await this.log(deploymentId, `✔ Loaded built-in starter template: [${templateId}]`, 'success');
+        await this.log(
+          deploymentId,
+          `✔ Loaded built-in starter template: [${templateId}]`,
+          'success'
+        );
       } else if (gitUrl) {
-        await this.log(deploymentId, `➔ Executing: git clone --depth 1 -b ${branch} ${gitUrl}`, 'info');
+        await this.log(
+          deploymentId,
+          `➔ Executing: git clone --depth 1 -b ${branch} ${gitUrl}`,
+          'info'
+        );
         try {
           execSync(`git clone --depth 1 -b ${branch} "${gitUrl}" "${buildFolder}"`, {
             stdio: 'pipe',
             timeout: 60000,
           });
-          await this.log(deploymentId, `✔ Cloned branch [${branch}] from repository successfully`, 'success');
-        } catch (gitErr) {
+          await this.log(
+            deploymentId,
+            `✔ Cloned branch [${branch}] from repository successfully`,
+            'success'
+          );
+        } catch (_gitErr) {
           // If clone fails (e.g. branch doesn't exist, try default clone)
-          await this.log(deploymentId, `⚠️ Branch '${branch}' clone failed, attempting default branch clone...`, 'warn');
+          await this.log(
+            deploymentId,
+            `⚠️ Branch '${branch}' clone failed, attempting default branch clone...`,
+            'warn'
+          );
           execSync(`git clone --depth 1 "${gitUrl}" "${buildFolder}"`, {
             stdio: 'pipe',
             timeout: 60000,
           });
-          await this.log(deploymentId, `✔ Cloned default branch from repository successfully`, 'success');
+          await this.log(
+            deploymentId,
+            `✔ Cloned default branch from repository successfully`,
+            'success'
+          );
         }
       } else {
         throw new Error('Neither gitUrl nor templateId was provided.');
       }
 
       // 3. Dependency Installation
-      await this.log(deploymentId, `\n⚙️ [Step 2/5] Checking dependencies & environment...`, 'step');
+      await this.log(
+        deploymentId,
+        `\n⚙️ [Step 2/5] Checking dependencies & environment...`,
+        'step'
+      );
       const hasPackageJson = fs.existsSync(path.join(buildFolder, 'package.json'));
-      
+
       if (hasPackageJson) {
         const installCmd = installCommand || 'npm.cmd install || npm install';
         await this.log(deploymentId, `➔ Running install command: ${installCmd}`, 'info');
         try {
-          const installOutput = execSync(installCmd, {
+          execSync(installCmd, {
             cwd: buildFolder,
             stdio: 'pipe',
             timeout: 120000,
           });
           await this.log(deploymentId, `✔ Dependencies installed successfully`, 'success');
         } catch (instErr) {
-          await this.log(deploymentId, `⚠️ Warning during dependency install: ${instErr.message}`, 'warn');
+          await this.log(
+            deploymentId,
+            `⚠️ Warning during dependency install: ${instErr.message}`,
+            'warn'
+          );
         }
       } else {
-        await this.log(deploymentId, `ℹ Static project detected (no package.json required).`, 'info');
+        await this.log(
+          deploymentId,
+          `ℹ Static project detected (no package.json required).`,
+          'info'
+        );
       }
 
       // 4. Build Command Execution
       await this.log(deploymentId, `\n🔨 [Step 3/5] Executing application build...`, 'step');
       if (buildCommand) {
         await this.log(deploymentId, `➔ Running: ${buildCommand}`, 'info');
-        const buildOutput = execSync(buildCommand, {
+        execSync(buildCommand, {
           cwd: buildFolder,
           stdio: 'pipe',
           timeout: 120000,
@@ -128,10 +168,18 @@ class BuildWorker {
             });
             await this.log(deploymentId, `✔ Application compiled successfully.`, 'success');
           } catch (bldErr) {
-            await this.log(deploymentId, `⚠️ Warning during npm run build: ${bldErr.message}`, 'warn');
+            await this.log(
+              deploymentId,
+              `⚠️ Warning during npm run build: ${bldErr.message}`,
+              'warn'
+            );
           }
         } else {
-          await this.log(deploymentId, `ℹ No custom build script found, using root directory.`, 'info');
+          await this.log(
+            deploymentId,
+            `ℹ No custom build script found, using root directory.`,
+            'info'
+          );
         }
       } else {
         await this.log(deploymentId, `✔ Ready to package static assets.`, 'success');
@@ -142,7 +190,12 @@ class BuildWorker {
       const candidateDirs = [outputDir, 'dist', 'build', 'out', 'public', '.'];
       for (const cand of candidateDirs) {
         const testPath = path.join(buildFolder, cand);
-        if (cand !== '.' && fs.existsSync(testPath) && fs.statSync(testPath).isDirectory() && fs.readdirSync(testPath).length > 0) {
+        if (
+          cand !== '.' &&
+          fs.existsSync(testPath) &&
+          fs.statSync(testPath).isDirectory() &&
+          fs.readdirSync(testPath).length > 0
+        ) {
           targetDistDir = testPath;
           await this.log(deploymentId, `🔍 Located build output directory at: ./${cand}`, 'info');
           break;
@@ -155,16 +208,28 @@ class BuildWorker {
       let uploadedCount = 0;
       let totalBytes = 0;
 
-      const uploadedFiles = await storage.uploadDirectory(targetDistDir, s3Prefix, (key, size) => {
+      await storage.uploadDirectory(targetDistDir, s3Prefix, (key, size) => {
         uploadedCount++;
         totalBytes += size;
-        this.log(deploymentId, `  ⬆ [S3 PutObject] ${key} (${(size / 1024).toFixed(1)} KB)`, 'upload');
+        this.log(
+          deploymentId,
+          `  ⬆ [S3 PutObject] ${key} (${(size / 1024).toFixed(1)} KB)`,
+          'upload'
+        );
       });
 
-      await this.log(deploymentId, `✔ Upload complete! ${uploadedCount} assets transferred to S3 (${(totalBytes / 1024).toFixed(1)} KB total).`, 'success');
+      await this.log(
+        deploymentId,
+        `✔ Upload complete! ${uploadedCount} assets transferred to S3 (${(totalBytes / 1024).toFixed(1)} KB total).`,
+        'success'
+      );
 
       // 7. Register Route in Redis
-      await this.log(deploymentId, `\n🌐 [Step 5/5] Registering edge routes in Reverse Proxy & Redis...`, 'step');
+      await this.log(
+        deploymentId,
+        `\n🌐 [Step 5/5] Registering edge routes in Reverse Proxy & Redis...`,
+        'step'
+      );
       const deployedUrl = `http://localhost:8000/site/${projectSlug}/`;
       const durationMs = Date.now() - startTime;
 
@@ -189,18 +254,22 @@ class BuildWorker {
 
       await this.log(deploymentId, `\n🎉 [DEPLOYMENT SUCCESSFUL]`, 'complete');
       await this.log(deploymentId, `🔗 Access Live URL: ${deployedUrl}`, 'link');
-      await this.log(deploymentId, `⏱️ Total build and deployment time: ${(durationMs / 1000).toFixed(2)}s`, 'system');
+      await this.log(
+        deploymentId,
+        `⏱️ Total build and deployment time: ${(durationMs / 1000).toFixed(2)}s`,
+        'system'
+      );
 
       // Clean up temp build folder
       try {
         fs.rmSync(buildFolder, { recursive: true, force: true });
-      } catch (e) {}
+      } catch (_e) {}
 
       return deployInfo;
     } catch (error) {
       const durationMs = Date.now() - startTime;
       await this.log(deploymentId, `\n❌ [DEPLOYMENT FAILED]: ${error.message}`, 'error');
-      
+
       const failedInfo = {
         deploymentId,
         projectSlug,
@@ -209,14 +278,14 @@ class BuildWorker {
         durationMs,
         completedAt: new Date().toISOString(),
       };
-      
+
       await redis.set(`deployment:${deploymentId}`, failedInfo);
       await this.updateDeploymentStatus(deploymentId, projectSlug, 'FAILED', failedInfo);
 
       // Clean up
       try {
         fs.rmSync(buildFolder, { recursive: true, force: true });
-      } catch (e) {}
+      } catch (_e) {}
 
       throw error;
     }
@@ -227,10 +296,14 @@ class BuildWorker {
     let history = [];
     const raw = await redis.get(key);
     if (raw) {
-      try { history = JSON.parse(raw); } catch (e) { history = []; }
+      try {
+        history = JSON.parse(raw);
+      } catch (_e) {
+        history = [];
+      }
     }
 
-    const index = history.findIndex(d => d.deploymentId === deploymentId);
+    const index = history.findIndex((d) => d.deploymentId === deploymentId);
     const item = {
       deploymentId,
       projectSlug,

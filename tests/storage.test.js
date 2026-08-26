@@ -26,7 +26,7 @@ describe('Storage Service', () => {
     const list = await storage.listObjects('__outputs/jest-test-app');
     expect(Array.isArray(list)).toBe(true);
     expect(list.length).toBeGreaterThan(0);
-    expect(list.some(item => item.key === testKey)).toBe(true);
+    expect(list.some((item) => item.key === testKey)).toBe(true);
   });
 
   test('should support mode inspection and switching', () => {
