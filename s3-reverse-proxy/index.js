@@ -33,9 +33,9 @@ app.get('/health', (_req, res) => {
 });
 
 /**
- * Main reverse proxy router
+ * Main reverse proxy router (Catch-all for all methods & paths)
  */
-app.all('*', async (req, res) => {
+app.use(async (req, res) => {
   try {
     let projectSlug = null;
     let filePath = req.path;
