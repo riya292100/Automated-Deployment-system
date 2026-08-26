@@ -7,6 +7,7 @@ Thank you for your interest in contributing! We welcome bug reports, feature req
 ## 🛠️ Development Workflow
 
 ### 1. Clone & Setup
+
 ```bash
 git clone https://github.com/riya292100/Automated-Deployment-system.git
 cd Automated-Deployment-system
@@ -15,9 +16,11 @@ cp .env.example .env
 ```
 
 ### 2. Launch Local Environment
+
 ```bash
 npm start
 ```
+
 The Dashboard will be accessible at `http://localhost:9000` and the S3 Reverse Proxy at `http://localhost:8000`.
 
 ---
@@ -27,6 +30,7 @@ The Dashboard will be accessible at `http://localhost:9000` and the S3 Reverse P
 All contributions must meet our quality and test coverage standards:
 
 ### Run Tests
+
 ```bash
 # Run unit & integration test suite
 npm test
@@ -36,6 +40,7 @@ npm run test:coverage
 ```
 
 ### Code Style & Linting
+
 ```bash
 # Run ESLint validation
 npm run lint
@@ -55,6 +60,7 @@ npm run format
 ## 📝 Commit Convention
 
 We adhere to the [Conventional Commits](https://www.conventionalcommits.org/) specification:
+
 - `feat:` A new feature
 - `fix:` A bug fix
 - `refactor:` Code restructuring without changing external behavior
@@ -68,6 +74,7 @@ We adhere to the [Conventional Commits](https://www.conventionalcommits.org/) sp
 ## 🚀 Pull Request Checklist
 
 Before submitting a Pull Request:
+
 1. Ensure all tests pass (`npm test`).
 2. Ensure code passes lint and formatting checks (`npm run lint` and `npm run format:check`).
 3. Pair new features or bug fixes with tests in `tests/`.

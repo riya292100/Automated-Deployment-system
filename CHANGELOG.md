@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.0] - 2026-08-26
 
 ### Added
+
 - **Zod Input Validation**: Schema validation at all API boundaries (`api-server/schemas.js`) with structured error issues.
 - **Jest Test Suite & Coverage**: Migrated from custom assert scripts to Jest with `supertest`, coverage threshold enforcement (>70%), and 35+ test cases.
 - **GitHub Actions CI Workflow**: Multi-node matrix (20.x, 22.x) CI pipeline for linting, formatting checks, test coverage, and `npm audit`.
@@ -17,12 +18,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Code Cleanliness**: Configured ESLint (flat config) and Prettier; modularized `dashboard/app.js` into focused sub-modules under `dashboard/js/`.
 
 ### Changed
+
 - Refactored `start-all.js`, `api-server/index.js`, and `s3-reverse-proxy/index.js` to load configuration via `dotenv`.
 - Enhanced Reverse Proxy SPA router and error handling.
 
 ## [1.0.0] - 2026-08-26
 
 ### Added
+
 - Initial release of Automated Deployment System.
 - Express REST API orchestrator (`port 9000`).
 - Containerized build worker with S3 uploader and Redis Pub/Sub log streaming.

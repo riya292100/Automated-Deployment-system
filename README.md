@@ -82,12 +82,12 @@ npm start
 
 ### 3. Access the Applications
 
-| Service | URL | Description |
-| :--- | :--- | :--- |
-| **Cloud Dashboard** | `http://localhost:9000` | Deployment management, live terminal, and visualizer |
-| **S3 Reverse Proxy** | `http://localhost:8000` | Dynamic edge router and static asset CDN |
-| **API Endpoints** | `http://localhost:9000/api/*` | REST API, SSE streaming, and analytics |
-| **Observability Metrics** | `http://localhost:9000/api/metrics` | Prometheus & JSON telemetry metrics |
+| Service                   | URL                                 | Description                                          |
+| :------------------------ | :---------------------------------- | :--------------------------------------------------- |
+| **Cloud Dashboard**       | `http://localhost:9000`             | Deployment management, live terminal, and visualizer |
+| **S3 Reverse Proxy**      | `http://localhost:8000`             | Dynamic edge router and static asset CDN             |
+| **API Endpoints**         | `http://localhost:9000/api/*`       | REST API, SSE streaming, and analytics               |
+| **Observability Metrics** | `http://localhost:9000/api/metrics` | Prometheus & JSON telemetry metrics                  |
 
 ---
 
@@ -123,6 +123,7 @@ docker compose up --build
 ```
 
 Services defined in `docker-compose.yml`:
+
 - `api-server` (Port 9000)
 - `s3-reverse-proxy` (Port 8000)
 - `redis-service` (Port 6379)
@@ -146,7 +147,9 @@ To run directly against live AWS cloud resources:
 ## 📡 REST API Reference
 
 ### 1. Deploy Project
+
 `POST /api/deploy`
+
 ```json
 {
   "templateId": "modern-landing-page",
@@ -157,23 +160,28 @@ To run directly against live AWS cloud resources:
   "outputDir": "dist"
 }
 ```
-*Validated via Zod schema. Returns `400 Bad Request` with validation issues on failure.*
+
+_Validated via Zod schema. Returns `400 Bad Request` with validation issues on failure._
 
 ### 2. Live Log Stream (SSE)
+
 `GET /api/logs/:deploymentId`
-*Returns real-time Server-Sent Events (SSE) connected to Redis channel `logs:{deploymentId}`.*
+_Returns real-time Server-Sent Events (SSE) connected to Redis channel `logs:{deploymentId}`._
 
 ### 3. System Analytics
+
 `GET /api/analytics`
-*Returns system telemetry including active deployments, S3 bytes transferred, average build duration, and cache hit rates.*
+_Returns system telemetry including active deployments, S3 bytes transferred, average build duration, and cache hit rates._
 
 ### 4. Prometheus / JSON Metrics
+
 `GET /api/metrics`
-*Returns memory heap, RSS, uptime, and request counters in JSON or Prometheus format.*
+_Returns memory heap, RSS, uptime, and request counters in JSON or Prometheus format._
 
 ### 5. Health Diagnostics
+
 `GET /api/health`
-*Returns health status of API Server, ECS Worker, S3 Storage, and Redis.*
+_Returns health status of API Server, ECS Worker, S3 Storage, and Redis._
 
 ---
 
