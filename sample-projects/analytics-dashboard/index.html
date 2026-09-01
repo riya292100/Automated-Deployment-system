@@ -4,135 +4,252 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cloud Metrics & Telemetry Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📈</text></svg>" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #07090e;
       --panel: #0e131f;
       --border: #1a2236;
       --accent: #10b981;
+      --primary: #6366f1;
       --text: #e2e8f0;
       --text-dim: #64748b;
     }
     * { margin:0; padding:0; box-sizing: border-box; }
     body {
-      font-family: 'Space Grotesk', sans-serif;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       background: var(--bg);
       color: var(--text);
-      padding: 30px;
+      padding: 36px 30px;
     }
-    .container { max-width: 1100px; margin: 0 auto; }
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-    .title { font-size: 1.6rem; font-weight: 700; }
+    .container { max-width: 1150px; margin: 0 auto; }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .title-group { display: flex; align-items: center; gap: 14px; }
+    .title-icon { font-size: 2rem; }
+    .title { font-size: 1.5rem; font-weight: 700; }
+    .badge-row { display: flex; gap: 8px; margin-top: 4px; }
+    .badge {
+      background: rgba(99, 102, 241, 0.15);
+      color: #818cf8;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
     .status-badge {
       background: rgba(16, 185, 129, 0.15);
       color: var(--accent);
       border: 1px solid rgba(16, 185, 129, 0.3);
-      padding: 6px 14px;
+      padding: 6px 16px;
       border-radius: 20px;
       font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
     .metrics-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-      margin-bottom: 24px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 18px;
+      margin-bottom: 28px;
     }
     .metric-card {
       background: var(--panel);
       border: 1px solid var(--border);
-      padding: 20px;
-      border-radius: 12px;
+      padding: 22px;
+      border-radius: 14px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
     }
-    .metric-label { font-size: 0.8rem; color: var(--text-dim); text-transform: uppercase; margin-bottom: 6px; }
-    .metric-val { font-size: 1.8rem; font-weight: 700; color: #fff; }
+    .metric-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+    .metric-label { font-size: 0.8rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+    .metric-val { font-size: 2rem; font-weight: 800; color: #fff; margin-bottom: 4px; }
+    .metric-sub { font-size: 0.8rem; color: var(--accent); font-weight: 600; }
     .table-panel {
       background: var(--panel);
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: 14px;
       overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
     }
-    .table-panel h3 { padding: 16px 20px; border-bottom: 1px solid var(--border); font-size: 1.1rem; }
+    .panel-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .panel-top h3 { font-size: 1.1rem; font-weight: 700; }
+    .stream-tag { font-size: 0.8rem; color: var(--accent); font-weight: 600; }
     table { width: 100%; border-collapse: collapse; text-align: left; }
-    th, td { padding: 12px 20px; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
-    th { color: var(--text-dim); background: rgba(255, 255, 255, 0.02); }
-    .tag-ok { color: #10b981; }
+    th, td { padding: 14px 24px; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
+    th { color: var(--text-dim); background: rgba(255, 255, 255, 0.02); font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; }
+    td code { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #cbd5e1; }
+    .method-badge {
+      background: rgba(99, 102, 241, 0.2);
+      color: #818cf8;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .tag-ok { color: var(--accent); font-weight: 600; }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <div>
-        <h1 class="title">Cloud Analytics & Real-Time Telemetry</h1>
-        <p style="color: var(--text-dim); font-size: 0.9rem;">Automated S3 Static Edge Distribution Node</p>
+      <div class="title-group">
+        <span class="title-icon">📈</span>
+        <div>
+          <div class="title">Cloud Telemetry & Metrics Engine</div>
+          <div class="badge-row">
+            <span class="badge">TypeScript 5</span>
+            <span class="badge">ES Modules</span>
+            <span class="badge">Real-time Pub/Sub</span>
+          </div>
+        </div>
       </div>
-      <div class="status-badge">● Live Pipeline Online</div>
+      <div class="status-badge">
+        <span>●</span> Live Ingestion Active
+      </div>
     </div>
 
     <div class="metrics-grid">
       <div class="metric-card">
-        <div class="metric-label">Total Ingestion</div>
-        <div class="metric-val" id="ingest-metric">1,482,900</div>
+        <div class="metric-header">
+          <span class="metric-label">Ingested Requests/s</span>
+          <span>⚡</span>
+        </div>
+        <div class="metric-val" id="val-rps">284</div>
+        <div class="metric-sub">+12.4% vs baseline</div>
       </div>
       <div class="metric-card">
-        <div class="metric-label">Throughput / sec</div>
-        <div class="metric-val" id="rps-metric">2,420 rps</div>
+        <div class="metric-header">
+          <span class="metric-label">P95 TTFB Latency</span>
+          <span>⏱️</span>
+        </div>
+        <div class="metric-val">14.6ms</div>
+        <div class="metric-sub">-2.3ms optimized</div>
       </div>
       <div class="metric-card">
-        <div class="metric-label">Edge Cache Hit</div>
-        <div class="metric-val">99.8%</div>
+        <div class="metric-header">
+          <span class="metric-label">S3 Edge Route Uptime</span>
+          <span>🛡️</span>
+        </div>
+        <div class="metric-val">99.99%</div>
+        <div class="metric-sub">Zero downtime</div>
       </div>
       <div class="metric-card">
-        <div class="metric-label">Avg TTL</div>
-        <div class="metric-val">86,400s</div>
+        <div class="metric-header">
+          <span class="metric-label">Active Edge Clusters</span>
+          <span>🌐</span>
+        </div>
+        <div class="metric-val">18 Nodes</div>
+        <div class="metric-sub">4 Global Regions</div>
       </div>
     </div>
 
     <div class="table-panel">
-      <h3>Recent Edge Requests & Route Logs</h3>
+      <div class="panel-top">
+        <h3>Live Event Stream (Real-Time Ingestion)</h3>
+        <span class="stream-tag">● Streaming updates every 3s</span>
+      </div>
       <table>
         <thead>
           <tr>
             <th>Timestamp</th>
             <th>Method</th>
-            <th>Route</th>
-            <th>Status</th>
+            <th>Endpoint Route</th>
+            <th>Region</th>
             <th>Latency</th>
+            <th>Status</th>
           </tr>
         </thead>
-        <tbody id="logs-body">
+        <tbody id="telemetry-table-body">
           <tr>
-            <td>2026-08-26 19:12:04</td>
-            <td>GET</td>
-            <td>/index.html</td>
-            <td class="tag-ok">200 OK (Cache HIT)</td>
-            <td>1.2 ms</td>
+            <td><code>16:25:01</code></td>
+            <td><span class="method-badge">POST</span></td>
+            <td><code>/api/deploy</code></td>
+            <td><code>us-east-1</code></td>
+            <td>18ms</td>
+            <td><span class="tag-ok">200 OK</span></td>
           </tr>
           <tr>
-            <td>2026-08-26 19:12:02</td>
-            <td>GET</td>
-            <td>/style.css</td>
-            <td class="tag-ok">200 OK (Cache HIT)</td>
-            <td>0.9 ms</td>
+            <td><code>16:24:58</code></td>
+            <td><span class="method-badge">GET</span></td>
+            <td><code>/site/react-app/</code></td>
+            <td><code>eu-west-1</code></td>
+            <td>9ms</td>
+            <td><span class="tag-ok">200 OK</span></td>
           </tr>
           <tr>
-            <td>2026-08-26 19:11:58</td>
-            <td>GET</td>
-            <td>/main.js</td>
-            <td class="tag-ok">200 OK (Cache HIT)</td>
-            <td>1.1 ms</td>
+            <td><code>16:24:55</code></td>
+            <td><span class="method-badge">GET</span></td>
+            <td><code>/api/metrics</code></td>
+            <td><code>us-west-2</code></td>
+            <td>6ms</td>
+            <td><span class="tag-ok">200 OK</span></td>
+          </tr>
+          <tr>
+            <td><code>16:24:52</code></td>
+            <td><span class="method-badge">GET</span></td>
+            <td><code>/api/logs/dep-412</code></td>
+            <td><code>ap-southeast-1</code></td>
+            <td>12ms</td>
+            <td><span class="tag-ok">200 OK</span></td>
           </tr>
         </tbody>
       </table>
     </div>
   </div>
 
-  <script>
-    // Live update simulation
+  <script type="module">
+    // Modern ES Module reactive simulation
+    const tableBody = document.getElementById('telemetry-table-body');
+    const rpsEl = document.getElementById('val-rps');
+
+    const sampleRoutes = [
+      { method: 'GET', path: '/site/react-vite-app/', region: 'us-east-1' },
+      { method: 'POST', path: '/api/deploy', region: 'eu-west-1' },
+      { method: 'GET', path: '/api/metrics', region: 'us-west-2' },
+      { method: 'GET', path: '/api/health', region: 'ap-southeast-1' },
+      { method: 'GET', path: '/api/logs/dep-live', region: 'us-east-1' }
+    ];
+
     setInterval(() => {
-      const rps = 2400 + Math.floor(Math.random() * 80);
-      document.getElementById('rps-metric').textContent = `${rps} rps`;
-    }, 2500);
+      const route = sampleRoutes[Math.floor(Math.random() * sampleRoutes.length)];
+      const latency = Math.floor(Math.random() * 25) + 6;
+      const time = new Date().toTimeString().split(' ')[0];
+
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td><code>${time}</code></td>
+        <td><span class="method-badge">${route.method}</span></td>
+        <td><code>${route.path}</code></td>
+        <td><code>${route.region}</code></td>
+        <td>${latency}ms</td>
+        <td><span class="tag-ok">200 OK</span></td>
+      `;
+
+      tableBody.insertBefore(row, tableBody.firstChild);
+      if (tableBody.children.length > 7) {
+        tableBody.removeChild(tableBody.lastChild);
+      }
+
+      const currentRps = parseInt(rpsEl.innerText, 10);
+      rpsEl.innerText = currentRps + (Math.floor(Math.random() * 5) - 2);
+    }, 3000);
   </script>
 </body>
 </html>

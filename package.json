@@ -1,6 +1,6 @@
 {
   "name": "automated-deployment-system",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Production-grade Automated Deployment System with AWS ECS, S3, Redis, Reverse Proxy, and Interactive Dashboard",
   "main": "start-all.js",
   "type": "commonjs",
@@ -14,8 +14,12 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
     "api": "node api-server/index.js",
     "proxy": "node s3-reverse-proxy/index.js"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   },
   "keywords": [
     "automated-deployment",
@@ -39,10 +43,18 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jest": "^30.0.0",
+    "@types/mime-types": "^3.0.1",
+    "@types/node": "^26.4.0",
+    "@types/supertest": "^7.2.1",
+    "@types/ws": "^8.18.1",
     "eslint": "^9.21.0",
     "eslint-config-prettier": "^10.0.1",
     "jest": "^29.7.0",
     "prettier": "^3.5.2",
-    "supertest": "^7.0.0"
+    "supertest": "^7.0.0",
+    "typescript": "^7.0.2"
   }
 }

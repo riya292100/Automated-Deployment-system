@@ -1,0 +1,18 @@
+[package]
+name = "rust-wasm-edge-engine"
+version = "1.0.0"
+edition = "2021"
+description = "High-Performance Rust 2021 + WebAssembly Micro-Engine for Edge Cryptography"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+wasm-bindgen = "0.2.99"
+js-sys = "0.3.76"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"

@@ -27,6 +27,80 @@ class BuildWorker {
   }
 
   /**
+   * Detect modern languages and frameworks in workspace
+   */
+  detectLanguageAndFramework(buildFolder) {
+    const hasPackageJson = fs.existsSync(path.join(buildFolder, 'package.json'));
+    const hasTsConfig = fs.existsSync(path.join(buildFolder, 'tsconfig.json'));
+    const hasCargo =
+      fs.existsSync(path.join(buildFolder, 'Cargo.toml')) ||
+      fs.existsSync(path.join(buildFolder, 'Cargo.lock'));
+    const hasPython =
+      fs.existsSync(path.join(buildFolder, 'requirements.txt')) ||
+      fs.existsSync(path.join(buildFolder, 'pyproject.toml')) ||
+      fs.existsSync(path.join(buildFolder, 'app.py')) ||
+      fs.existsSync(path.join(buildFolder, 'main.py'));
+    const hasVite =
+      fs.existsSync(path.join(buildFolder, 'vite.config.js')) ||
+      fs.existsSync(path.join(buildFolder, 'vite.config.ts')) ||
+      fs.existsSync(path.join(buildFolder, 'vite.config.mjs'));
+    const hasNext =
+      fs.existsSync(path.join(buildFolder, 'next.config.js')) ||
+      fs.existsSync(path.join(buildFolder, 'next.config.ts')) ||
+      fs.existsSync(path.join(buildFolder, 'next.config.mjs'));
+
+    let framework = 'Static Web App';
+    let language = 'JavaScript';
+
+    if (hasCargo) {
+      language = 'Rust / WASM';
+      framework = 'WebAssembly Micro-Engine';
+      return { language, framework, summary: `${language} (${framework})` };
+    }
+
+    if (hasPython) {
+      language = 'Python';
+      framework = 'Pyodide Data Engine';
+      return { language, framework, summary: `${language} (${framework})` };
+    }
+
+    if (hasTsConfig) {
+      language = 'TypeScript';
+    }
+
+    if (hasPackageJson) {
+      try {
+        const pkg = JSON.parse(fs.readFileSync(path.join(buildFolder, 'package.json'), 'utf8'));
+        const allDeps = { ...pkg.dependencies, ...pkg.devDependencies };
+        if (allDeps.react) {
+          const reactVer = allDeps.react.includes('19') ? 'React 19' : 'React';
+          framework = hasVite ? `${reactVer} + Vite` : reactVer;
+        } else if (allDeps.vue) {
+          framework = hasVite ? 'Vue 3 + Vite' : 'Vue 3';
+        } else if (allDeps.svelte) {
+          framework = hasVite ? 'Svelte 5 + Vite' : 'Svelte';
+        } else if (hasNext || allDeps.next) {
+          framework = 'Next.js 15';
+        } else if (allDeps.astro) {
+          framework = 'Astro 5';
+        } else if (hasVite) {
+          framework = 'Vite Modern SPA';
+        } else {
+          framework = 'Node.js App';
+        }
+      } catch (_e) {
+        framework = 'Node.js App';
+      }
+    }
+
+    return {
+      language,
+      framework,
+      summary: `${language} (${framework})`,
+    };
+  }
+
+  /**
    * Execute build process for a deployment
    */
   async executeBuild(deploymentPayload) {
@@ -113,17 +187,33 @@ class BuildWorker {
         throw new Error('Neither gitUrl nor templateId was provided.');
       }
 
-      // 3. Dependency Installation
+      // 3. Dependency Installation & Language Stack Detection
       await this.log(
         deploymentId,
-        `\n⚙️ [Step 2/5] Checking dependencies & environment...`,
+        `\n⚙️ [Step 2/5] Inspecting language stack & environment...`,
         'step'
       );
+      const stack = this.detectLanguageAndFramework(buildFolder);
+      await this.log(deploymentId, `⚡ Detected Language & Framework: [${stack.summary}]`, 'info');
       const hasPackageJson = fs.existsSync(path.join(buildFolder, 'package.json'));
       const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+      const prebuiltDist = path.join(buildFolder, outputDir || 'dist');
+      const hasPrebuiltBundle =
+        !buildCommand &&
+        !installCommand &&
+        fs.existsSync(prebuiltDist) &&
+        fs.statSync(prebuiltDist).isDirectory() &&
+        fs.readdirSync(prebuiltDist).length > 0;
 
-      if (hasPackageJson) {
-        const installCmd = installCommand || `${npmCmd} install`;
+      if (hasPrebuiltBundle) {
+        await this.log(
+          deploymentId,
+          `✔ Pre-compiled production bundle detected in ./${outputDir || 'dist'} (optimized fast-path deployment).`,
+          'success'
+        );
+      } else if (hasPackageJson) {
+        const installCmd =
+          installCommand || `${npmCmd} install --prefer-offline --no-audit --no-fund`;
         await this.log(deploymentId, `➔ Running install command: ${installCmd}`, 'info');
         try {
           execSync(installCmd, {
@@ -157,6 +247,12 @@ class BuildWorker {
           timeout: 120000,
         });
         await this.log(deploymentId, `✔ Build command finished cleanly.`, 'success');
+      } else if (hasPrebuiltBundle) {
+        await this.log(
+          deploymentId,
+          `✔ Production bundle verified and ready for packaging.`,
+          'success'
+        );
       } else if (hasPackageJson) {
         const pkg = JSON.parse(fs.readFileSync(path.join(buildFolder, 'package.json'), 'utf8'));
         if (pkg.scripts && pkg.scripts.build) {
@@ -246,6 +342,9 @@ class BuildWorker {
         completedAt: new Date().toISOString(),
         gitUrl: gitUrl || `template:${templateId}`,
         branch,
+        stack: stack.summary,
+        language: stack.language,
+        framework: stack.framework,
       };
 
       // Save to Redis cache for reverse proxy fast lookup

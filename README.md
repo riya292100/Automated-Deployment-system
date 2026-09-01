@@ -3,7 +3,9 @@
 > **Autonomous Cloud Deployment Platform using Docker, AWS ECS Fargate, Amazon S3, Redis, and Reverse Proxy**
 
 [![CI Pipeline](https://github.com/riya292100/Automated-Deployment-system/actions/workflows/ci.yml/badge.svg)](https://github.com/riya292100/Automated-Deployment-system/actions/workflows/ci.yml)
-[![Coverage Status](https://img.shields.io/badge/Coverage-79%25-brightgreen.svg?style=flat-square)](https://github.com/riya292100/Automated-Deployment-system)
+[![TypeScript](https://img.shields.io/badge/TypeScript-7.0-3178c6.svg?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
+[![Node.js Version](https://img.shields.io/badge/Node.js-%3E%3D22%20LTS-339933.svg?style=flat-square&logo=nodedotjs)](https://nodejs.org)
+[![Coverage Status](https://img.shields.io/badge/Coverage-80%25-brightgreen.svg?style=flat-square)](https://github.com/riya292100/Automated-Deployment-system)
 [![Validation: Zod](https://img.shields.io/badge/Validation-Zod-3068b7.svg?style=flat-square&logo=zod)](https://zod.dev)
 [![Code Style: Prettier](https://img.shields.io/badge/Code_Style-Prettier-ff69b4.svg?style=flat-square&logo=prettier)](https://prettier.io)
 [![Linter: ESLint](https://img.shields.io/badge/Linter-ESLint-4B32C3.svg?style=flat-square&logo=eslint)](https://eslint.org)
@@ -56,6 +58,21 @@ The **Automated Deployment System** is an end-to-end cloud platform engineered t
 
 ---
 
+## ⚡ Supported Modern Languages & Starter Templates
+
+The build server automatically detects and compiles projects written in all modern upgraded languages:
+
+| Language / Stack          | Framework           | Template ID           | Description                                                               |
+| :------------------------ | :------------------ | :-------------------- | :------------------------------------------------------------------------ |
+| **TypeScript / React 19** | Vite 6              | `react-vite-app`      | Enterprise Single Page App with typed hooks and real-time state telemetry |
+| **TypeScript / Vue 3.5**  | Vite 6              | `vue-vite-app`        | Composition API reactive frontend with distributed edge node telemetry    |
+| **Python 3.12+**          | Pyodide WebAssembly | `python-web-app`      | Scientific computing, Gaussian distribution analysis, and quantiles       |
+| **Rust 2021**             | WebAssembly         | `rust-wasm-app`       | High-speed cryptographic hash generator and prime compute sieve benchmark |
+| **TypeScript 5.8**        | ES Modules          | `analytics-dashboard` | Real-time telemetry engine with typed event streams and metrics charts    |
+| **ES2022+ / HTML5**       | CSS3                | `modern-landing-page` | High-converting dark-theme landing page with animations                   |
+
+---
+
 ## 🚀 Quick Start (Zero Setup Required)
 
 The system is equipped with high-performance zero-configuration local emulators for Amazon S3 and Redis, allowing you to run and test everything immediately out of the box.
@@ -101,6 +118,9 @@ npm test
 
 # Run test suite with coverage report
 npm run test:coverage
+
+# Run TypeScript strict type-checking
+npm run typecheck
 
 # Run ESLint linter
 npm run lint

@@ -155,7 +155,7 @@
                   <h3>Nexus Cloud Landing</h3>
                   <p>High-converting HTML5/CSS3 landing page with dark theme and animations.</p>
                   <div class="template-tags">
-                    <span>HTML5</span><span>CSS3</span><span>Vanilla JS</span>
+                    <span>HTML5 / CSS3</span><span>ES2022+</span><span>Zero-Config</span>
                   </div>
                 </div>
                 <button class="btn btn-sm btn-outline">Deploy Now &rarr;</button>
@@ -168,9 +168,9 @@
                 <div class="template-icon">⚛️</div>
                 <div class="template-body">
                   <h3>Enterprise React App</h3>
-                  <p>Single Page Application with live state counters and modular routing.</p>
+                  <p>Single Page Application built with React 19, TypeScript, and Vite 6.</p>
                   <div class="template-tags">
-                    <span>React</span><span>SPA</span><span>Vite</span>
+                    <span>React 19</span><span>TypeScript 5</span><span>Vite 6</span>
                   </div>
                 </div>
                 <button class="btn btn-sm btn-outline">Deploy Now &rarr;</button>
@@ -183,9 +183,54 @@
                 <div class="template-icon">📈</div>
                 <div class="template-body">
                   <h3>Telemetry Dashboard</h3>
-                  <p>Real-time telemetry dashboard with event streams and request logs.</p>
+                  <p>Real-time telemetry dashboard with TypeScript streams and request logs.</p>
                   <div class="template-tags">
-                    <span>Analytics</span><span>Dashboard</span><span>Charts</span>
+                    <span>TypeScript</span><span>ES Modules</span><span>Real-Time</span>
+                  </div>
+                </div>
+                <button class="btn btn-sm btn-outline">Deploy Now &rarr;</button>
+              </div>
+
+              <div
+                class="template-card"
+                onclick="app.quickDeploy('vue-vite-app', 'Vue 3 Enterprise App')"
+              >
+                <div class="template-icon">💚</div>
+                <div class="template-body">
+                  <h3>Vue 3 Enterprise App</h3>
+                  <p>Modern Single Page App with Vue 3.5, TypeScript, and Vite 6 build.</p>
+                  <div class="template-tags">
+                    <span>Vue 3</span><span>TypeScript 5</span><span>Vite 6</span>
+                  </div>
+                </div>
+                <button class="btn btn-sm btn-outline">Deploy Now &rarr;</button>
+              </div>
+
+              <div
+                class="template-card"
+                onclick="app.quickDeploy('python-web-app', 'Python WebAssembly App')"
+              >
+                <div class="template-icon">🐍</div>
+                <div class="template-body">
+                  <h3>Python 3.12 Data App</h3>
+                  <p>Client-side Python analytics and distribution engine running via Pyodide.</p>
+                  <div class="template-tags">
+                    <span>Python 3.12</span><span>Pyodide</span><span>WASM</span>
+                  </div>
+                </div>
+                <button class="btn btn-sm btn-outline">Deploy Now &rarr;</button>
+              </div>
+
+              <div
+                class="template-card"
+                onclick="app.quickDeploy('rust-wasm-app', 'Rust WASM Micro-Engine')"
+              >
+                <div class="template-icon">🦀</div>
+                <div class="template-body">
+                  <h3>Rust / WASM Engine</h3>
+                  <p>High-throughput cryptographic hashing and prime compute sieve in Rust.</p>
+                  <div class="template-tags">
+                    <span>Rust 2021</span><span>WASM</span><span>Zero-GC</span>
                   </div>
                 </div>
                 <button class="btn btn-sm btn-outline">Deploy Now &rarr;</button>
@@ -688,21 +733,44 @@
                     <input type="radio" name="templateChoice" value="modern-landing-page" checked />
                     <div class="radio-card-body">
                       <strong>🌐 Nexus Cloud Landing</strong>
-                      <span>Modern dark-theme landing page with animations</span>
+                      <span>Modern responsive dark-theme landing page (ES2022+ & CSS3)</span>
                     </div>
                   </label>
                   <label class="radio-card">
                     <input type="radio" name="templateChoice" value="react-vite-app" />
                     <div class="radio-card-body">
-                      <strong>⚛️ Enterprise React SPA</strong>
-                      <span>Interactive Single Page App with state counters</span>
+                      <strong>⚛️ Enterprise React SPA (React 19 + TypeScript + Vite)</strong>
+                      <span>Interactive Single Page App with typed hooks & Vite build</span>
                     </div>
                   </label>
                   <label class="radio-card">
                     <input type="radio" name="templateChoice" value="analytics-dashboard" />
                     <div class="radio-card-body">
-                      <strong>📈 Cloud Telemetry Dashboard</strong>
-                      <span>Real-time SaaS analytics and request logs</span>
+                      <strong>📈 Cloud Telemetry Dashboard (TypeScript + ES Modules)</strong>
+                      <span>Real-time SaaS telemetry engine with typed event streams</span>
+                    </div>
+                  </label>
+                  <label class="radio-card">
+                    <input type="radio" name="templateChoice" value="vue-vite-app" />
+                    <div class="radio-card-body">
+                      <strong>💚 Vue 3 Enterprise App (Vue 3.5 + TypeScript + Vite)</strong>
+                      <span>Reactive Composition API with typed edge node telemetry</span>
+                    </div>
+                  </label>
+                  <label class="radio-card">
+                    <input type="radio" name="templateChoice" value="python-web-app" />
+                    <div class="radio-card-body">
+                      <strong>🐍 Python WebAssembly App (Python 3.12 + Pyodide)</strong>
+                      <span>Scientific computing, percentiles, and statistical analytics</span>
+                    </div>
+                  </label>
+                  <label class="radio-card">
+                    <input type="radio" name="templateChoice" value="rust-wasm-app" />
+                    <div class="radio-card-body">
+                      <strong>🦀 Rust WebAssembly Engine (Rust 2021 + WASM)</strong>
+                      <span
+                        >Near-native execution speed with memory-safe cryptographic hashing</span
+                      >
                     </div>
                   </label>
                 </div>

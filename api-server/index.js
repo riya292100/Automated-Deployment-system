@@ -243,6 +243,74 @@ app.post('/api/deployments/:deploymentId/redeploy', async (req, res) => {
 });
 
 /**
+ * Get catalog of all starter templates and their upgraded language specifications
+ * GET /api/templates
+ */
+app.get('/api/templates', (req, res) => {
+  res.json({
+    templates: [
+      {
+        id: 'react-vite-app',
+        name: 'Enterprise React SPA',
+        description: 'Single Page Application built with React 19, TypeScript, and Vite 6.',
+        icon: '⚛️',
+        language: 'TypeScript',
+        framework: 'React 19 + Vite 6',
+        tags: ['React 19', 'TypeScript 5', 'Vite 6'],
+      },
+      {
+        id: 'vue-vite-app',
+        name: 'Vue 3 Enterprise App',
+        description: 'Modern Vue 3.5 Single Page Application using Composition API and TypeScript.',
+        icon: '💚',
+        language: 'TypeScript',
+        framework: 'Vue 3.5 + Vite 6',
+        tags: ['Vue 3', 'TypeScript 5', 'Vite 6'],
+      },
+      {
+        id: 'python-web-app',
+        name: 'Python WebAssembly Data App',
+        description:
+          'High-performance Python 3.12+ analytics runtime executing client-side with Pyodide.',
+        icon: '🐍',
+        language: 'Python',
+        framework: 'Python 3.12 + Pyodide',
+        tags: ['Python 3.12', 'Pyodide', 'WASM'],
+      },
+      {
+        id: 'rust-wasm-app',
+        name: 'Rust WebAssembly Micro-Engine',
+        description:
+          'High-speed cryptographic hash generator and compute benchmark compiled from Rust.',
+        icon: '🦀',
+        language: 'Rust / WASM',
+        framework: 'Rust 2021 + WASM',
+        tags: ['Rust', 'WebAssembly', 'High-Perf'],
+      },
+      {
+        id: 'analytics-dashboard',
+        name: 'Telemetry Dashboard',
+        description:
+          'Real-time telemetry dashboard with TypeScript streams and reactive request logs.',
+        icon: '📈',
+        language: 'TypeScript',
+        framework: 'TypeScript + ES Modules',
+        tags: ['TypeScript', 'ES Modules', 'Real-Time'],
+      },
+      {
+        id: 'modern-landing-page',
+        name: 'Nexus Cloud Landing',
+        description: 'High-converting HTML5/CSS3 landing page with dark theme and animations.',
+        icon: '🌐',
+        language: 'JavaScript',
+        framework: 'HTML5 / CSS3 / ES2022+',
+        tags: ['HTML5 / CSS3', 'ES2022+', 'Zero-Config'],
+      },
+    ],
+  });
+});
+
+/**
  * System-wide analytics & telemetry
  * GET /api/analytics
  */

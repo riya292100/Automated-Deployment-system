@@ -1,0 +1,14 @@
+{
+  "name": "cloud-analytics-telemetry-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Modern TypeScript and ES Module Cloud Telemetry Dashboard",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  }
+}

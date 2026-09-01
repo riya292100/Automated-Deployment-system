@@ -11,7 +11,15 @@ const deploySchema = z
       .optional()
       .or(z.literal('')),
     templateId: z
-      .enum(['modern-landing-page', 'react-vite-app', 'analytics-dashboard', ''])
+      .enum([
+        'modern-landing-page',
+        'react-vite-app',
+        'analytics-dashboard',
+        'vue-vite-app',
+        'python-web-app',
+        'rust-wasm-app',
+        '',
+      ])
       .optional(),
     projectName: z
       .string()
