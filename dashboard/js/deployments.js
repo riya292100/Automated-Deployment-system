@@ -355,7 +355,10 @@ class DeploymentsManager {
 
     Promise.all(promises).then(() => {
       if (statusBox) {
-        statusBox.innerHTML = `✔ Ready to deploy <strong>${this.uploadedFiles.length} file(s)</strong> (${this.uploadedFiles.map((f) => f.name).slice(0, 3).join(', ')}${this.uploadedFiles.length > 3 ? '...' : ''})`;
+        statusBox.innerHTML = `✔ Ready to deploy <strong>${this.uploadedFiles.length} file(s)</strong> (${this.uploadedFiles
+          .map((f) => f.name)
+          .slice(0, 3)
+          .join(', ')}${this.uploadedFiles.length > 3 ? '...' : ''})`;
         statusBox.style.display = 'block';
       }
     });

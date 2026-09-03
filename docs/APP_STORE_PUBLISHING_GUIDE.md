@@ -8,10 +8,10 @@
 
 Before publishing, it is essential to understand the official developer fees charged by Google and Apple:
 
-| Platform | Official Developer Fee | Free Alternatives Available? |
-| :--- | :--- | :--- |
-| **Google Play Store** | **$25 USD (One-Time)** | ✅ Yes! PWA, Direct APK, Amazon Appstore (0 fees) |
-| **Apple App Store** | **$99 USD / Year** | ✅ Yes! iOS PWA, TestFlight, Non-Profit Fee Waiver |
+| Platform              | Official Developer Fee | Free Alternatives Available?                       |
+| :-------------------- | :--------------------- | :------------------------------------------------- |
+| **Google Play Store** | **$25 USD (One-Time)** | ✅ Yes! PWA, Direct APK, Amazon Appstore (0 fees)  |
+| **Apple App Store**   | **$99 USD / Year**     | ✅ Yes! iOS PWA, TestFlight, Non-Profit Fee Waiver |
 
 ---
 
@@ -20,11 +20,14 @@ Before publishing, it is essential to understand the official developer fees cha
 If you do not wish to pay Google's $25 fee or Apple's $99/year fee, you can distribute this application for **100% free** using any of the three methods below:
 
 ### Method 1: Progressive Web App (PWA) — Instant Mobile Install (Recommended)
+
 This repository includes a full Web App Manifest (`dashboard/manifest.json`), service worker (`dashboard/sw.js`), and high-resolution mobile app icons (`dashboard/icons/`):
+
 - **On Android**: Open your live Vercel clone URL in Google Chrome. A prompt will appear: **"Install Vercel Clone"** or tap Chrome Menu (⋮) &rarr; **Install App**. It adds a full-screen, standalone native app with an app drawer icon!
 - **On iOS (iPhone / iPad)**: Open your live Vercel clone URL in Safari. Tap the **Share** button &rarr; **Add to Home Screen**. It launches as an independent full-screen app without Safari browser bars!
 
 ### Method 2: Direct Android APK via GitHub Releases (Free)
+
 1. In your GitHub repository (`riya292100/Automated-Deployment-system`), push a release tag (e.g. `v1.3.0`):
    ```bash
    git tag v1.3.0
@@ -34,7 +37,9 @@ This repository includes a full Web App Manifest (`dashboard/manifest.json`), se
 3. Users can download and install the `.apk` directly on any Android device with zero fees!
 
 ### Method 3: Amazon Appstore for Android (100% Free Developer Account)
+
 Unlike Google, Amazon does **not** charge a $25 registration fee for its Android Appstore:
+
 1. Register a free account at [developer.amazon.com](https://developer.amazon.com).
 2. Go to **Apps & Services** &rarr; **Add New App**.
 3. Upload your packaged Android APK and launch on millions of Amazon Fire and Android devices for free!
@@ -46,6 +51,7 @@ Unlike Google, Amazon does **not** charge a $25 registration fee for its Android
 If you have a Google Play Console account ($25 one-time registration):
 
 ### Step 1: Generate Android App Bundle (.aab) with PWABuilder or Bubblewrap
+
 1. Ensure your unified Vercel Clone is running publicly (e.g. on Render or via `npm run live`).
 2. Visit [PWABuilder.com](https://www.pwabuilder.com).
 3. Enter your live URL and click **Start**.
@@ -56,6 +62,7 @@ If you have a Google Play Console account ($25 one-time registration):
 6. Click **Generate** to download your signed or unsigned `.aab` file!
 
 ### Step 2: Upload to Google Play Console
+
 1. Log into [play.google.com/console](https://play.google.com/console).
 2. Click **Create App**:
    - App name: `Vercel Cloud Console`
@@ -78,6 +85,7 @@ If you have a Google Play Console account ($25 one-time registration):
 If you have an Apple Developer Account ($99/year or educational/non-profit waiver):
 
 ### Step 1: Open with Capacitor / Xcode
+
 1. Install Capacitor dependencies:
    ```bash
    npm install @capacitor/core @capacitor/cli @capacitor/ios
@@ -93,12 +101,14 @@ If you have an Apple Developer Account ($99/year or educational/non-profit waive
    ```
 
 ### Step 2: Archive & Upload via Xcode
+
 1. In Xcode, select **App** under Signing & Capabilities and choose your Apple Developer Team.
 2. Select target device **Any iOS Device (arm64)**.
 3. From the menu bar, choose **Product** &rarr; **Archive**.
 4. Once the build completes, click **Distribute App** &rarr; **App Store Connect** &rarr; **Upload**.
 
 ### Step 3: Complete App Store Connect Listing
+
 1. Go to [appstoreconnect.apple.com](https://appstoreconnect.apple.com).
 2. Select your newly uploaded build under your App record.
 3. Fill in required App Store metadata, privacy policy URL, and screenshots.

@@ -200,7 +200,9 @@ class DashboardApp {
         this.deferredPrompt = null;
       });
     } else {
-      alert('To install on iOS: Tap Share ➔ "Add to Home Screen".\nTo install on Android: Tap Chrome Menu (⋮) ➔ "Install App".');
+      alert(
+        'To install on iOS: Tap Share ➔ "Add to Home Screen".\nTo install on Android: Tap Chrome Menu (⋮) ➔ "Install App".'
+      );
     }
   }
 }

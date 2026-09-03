@@ -5,7 +5,6 @@
  */
 require('dotenv').config();
 const { spawn } = require('child_process');
-const path = require('path');
 
 process.env.UNIFIED_SERVER = 'true';
 const PORT = process.env.PORT || 3000;
@@ -19,7 +18,7 @@ console.log('================================================================\n'
 console.log(`[1/3] 🚀 Initializing Unified Vercel Platform on local port ${PORT}...`);
 
 // Start the unified server
-const server = require('../server');
+require('../server');
 
 setTimeout(() => {
   console.log(`[2/3] 🌐 Connecting free global HTTPS tunnel...`);
@@ -61,7 +60,7 @@ setTimeout(() => {
     }
   });
 
-  tunnelProcess.on('close', (code) => {
+  tunnelProcess.on('close', (_code) => {
     if (!publicUrl) {
       console.log('\nℹ️ Tunnel closed. Platform remains accessible locally at:');
       console.log(`   http://localhost:${PORT}`);
@@ -72,7 +71,9 @@ setTimeout(() => {
   setTimeout(() => {
     if (!publicUrl) {
       console.log(`[3/3] ℹ️ Local Vercel Clone is running at: http://localhost:${PORT}`);
-      console.log(`      If tunnel is still connecting, you can also deploy to Render Free Tier (see render.yaml).\n`);
+      console.log(
+        `      If tunnel is still connecting, you can also deploy to Render Free Tier (see render.yaml).\n`
+      );
     }
   }, 10000);
 }, 1500);

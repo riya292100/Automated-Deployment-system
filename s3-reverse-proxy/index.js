@@ -35,7 +35,7 @@ app.get('/health', (_req, res) => {
 /**
  * Main reverse proxy request handler (can be used as standalone middleware or mounted in unified server)
  */
-async function handleProxyRequest(req, res, next) {
+async function handleProxyRequest(req, res, _next) {
   try {
     let projectSlug = null;
     let filePath = req.path;

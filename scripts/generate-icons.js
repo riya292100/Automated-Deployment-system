@@ -26,15 +26,15 @@ function createPng(width, height) {
         nx <= 0.5 + ((ny - 0.22) / (0.78 - 0.22)) * 0.35;
 
       if (inTriangle) {
-        rawData[pxOffset] = 255;     // R
+        rawData[pxOffset] = 255; // R
         rawData[pxOffset + 1] = 255; // G
         rawData[pxOffset + 2] = 255; // B
         rawData[pxOffset + 3] = 255; // A
       } else {
         // Dark gradient background #0a0e1a
-        rawData[pxOffset] = 10;      // R
-        rawData[pxOffset + 1] = 14;  // G
-        rawData[pxOffset + 2] = 26;  // B
+        rawData[pxOffset] = 10; // R
+        rawData[pxOffset + 1] = 14; // G
+        rawData[pxOffset + 2] = 26; // B
         rawData[pxOffset + 3] = 255; // A
       }
     }
@@ -75,8 +75,8 @@ function createPng(width, height) {
   const ihdrData = Buffer.alloc(13);
   ihdrData.writeUInt32BE(width, 0);
   ihdrData.writeUInt32BE(height, 4);
-  ihdrData[8] = 8;  // bit depth: 8
-  ihdrData[9] = 6;  // color type: RGBA (6)
+  ihdrData[8] = 8; // bit depth: 8
+  ihdrData[9] = 6; // color type: RGBA (6)
   ihdrData[10] = 0; // compression: deflate
   ihdrData[11] = 0; // filter method
   ihdrData[12] = 0; // interlace: none

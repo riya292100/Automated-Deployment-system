@@ -102,7 +102,9 @@ app.post('/api/deploy', async (req, res) => {
     _totalDeploymentsCount++;
 
     const baseUrl = getBaseUrl(req);
-    const hostHeader = (req.headers['x-forwarded-host'] || req.get('host') || 'localhost').split(':')[0];
+    const hostHeader = (req.headers['x-forwarded-host'] || req.get('host') || 'localhost').split(
+      ':'
+    )[0];
     const previewUrl = `${baseUrl}/site/${projectSlug}/`;
     const subdomainUrl = `${req.protocol || 'http'}://${projectSlug}.${hostHeader}${req.get('host') && req.get('host').includes(':') ? ':' + req.get('host').split(':')[1] : ''}/`;
 
@@ -182,7 +184,9 @@ app.post('/api/deploy/direct', async (req, res) => {
     _totalDeploymentsCount++;
 
     const baseUrl = getBaseUrl(req);
-    const hostHeader = (req.headers['x-forwarded-host'] || req.get('host') || 'localhost').split(':')[0];
+    const hostHeader = (req.headers['x-forwarded-host'] || req.get('host') || 'localhost').split(
+      ':'
+    )[0];
     const previewUrl = `${baseUrl}/site/${projectSlug}/`;
     const subdomainUrl = `${req.protocol || 'http'}://${projectSlug}.${hostHeader}${req.get('host') && req.get('host').includes(':') ? ':' + req.get('host').split(':')[1] : ''}/`;
 

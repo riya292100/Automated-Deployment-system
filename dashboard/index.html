@@ -93,7 +93,11 @@
           </div>
 
           <div class="topbar-actions">
-            <button class="btn btn-secondary" id="btn-publish-online" onclick="app.switchTab('publish')">
+            <button
+              class="btn btn-secondary"
+              id="btn-publish-online"
+              onclick="app.switchTab('publish')"
+            >
               <span>🚀 Publish Free Online</span>
             </button>
             <button class="btn btn-secondary" id="btn-health-check" onclick="app.checkHealth()">
@@ -159,9 +163,13 @@
             <div class="panel-header">
               <div>
                 <h2>▲ Live Vercel Projects</h2>
-                <p class="panel-subtitle">Production deployments served across the edge network with instant S3 routing</p>
+                <p class="panel-subtitle">
+                  Production deployments served across the edge network with instant S3 routing
+                </p>
               </div>
-              <button class="btn btn-sm btn-primary" onclick="app.openDeployModal()">+ New Project</button>
+              <button class="btn btn-sm btn-primary" onclick="app.openDeployModal()">
+                + New Project
+              </button>
             </div>
             <div class="vercel-projects-grid" id="vercel-project-cards">
               <!-- Rendered dynamically by app.deployments.renderVercelProjectCards -->
@@ -615,8 +623,8 @@
               <div class="publish-hero-badge">▲ 100% FREE CLOUD HOSTING & PUBLIC URLS</div>
               <h2>Publish Your Vercel Clone Live Online</h2>
               <p>
-                Get your automated deployment platform live on the public internet completely free with
-                instant global tunnels or 24/7 cloud deployments on Render, Koyeb, and Railway.
+                Get your automated deployment platform live on the public internet completely free
+                with instant global tunnels or 24/7 cloud deployments on Render, Koyeb, and Railway.
               </p>
             </div>
 
@@ -628,23 +636,39 @@
                   <div class="publish-card-icon">⚡</div>
                   <div>
                     <h3>1-Click Public Live URL (Tunnel)</h3>
-                    <p>Instant secure HTTPS URL accessible from any phone or PC worldwide (zero signup or DNS required)</p>
+                    <p>
+                      Instant secure HTTPS URL accessible from any phone or PC worldwide (zero
+                      signup or DNS required)
+                    </p>
                   </div>
                 </div>
                 <div class="publish-step-box">
-                  <div class="step-line-title">Run this single command in your project terminal:</div>
+                  <div class="step-line-title">
+                    Run this single command in your project terminal:
+                  </div>
                   <div class="command-box">
                     <code>npm run live</code>
-                    <button class="btn-copy-cmd" onclick="app.copyCommand('npm run live', this)">Copy</button>
+                    <button class="btn-copy-cmd" onclick="app.copyCommand('npm run live', this)">
+                      Copy
+                    </button>
                   </div>
                   <p class="step-desc">
-                    Starts the unified Vercel platform and automatically connects a high-speed Cloudflare Quick Tunnel / Localtunnel with free HTTPS encryption.
+                    Starts the unified Vercel platform and automatically connects a high-speed
+                    Cloudflare Quick Tunnel / Localtunnel with free HTTPS encryption.
                   </p>
                 </div>
                 <div class="publish-features-list">
-                  <div class="feature-item">✔ <strong>Zero account needed:</strong> No credit card or registration required</div>
-                  <div class="feature-item">✔ <strong>Full functionality:</strong> Web Dashboard, REST API, SSE streaming logs, and reverse proxy work instantly</div>
-                  <div class="feature-item">✔ <strong>Mobile ready:</strong> Test your deployments on your phone or share with teammates immediately</div>
+                  <div class="feature-item">
+                    ✔ <strong>Zero account needed:</strong> No credit card or registration required
+                  </div>
+                  <div class="feature-item">
+                    ✔ <strong>Full functionality:</strong> Web Dashboard, REST API, SSE streaming
+                    logs, and reverse proxy work instantly
+                  </div>
+                  <div class="feature-item">
+                    ✔ <strong>Mobile ready:</strong> Test your deployments on your phone or share
+                    with teammates immediately
+                  </div>
                 </div>
               </div>
 
@@ -655,19 +679,38 @@
                   <div class="publish-card-icon">☁️</div>
                   <div>
                     <h3>Deploy to Render (Free Web Service)</h3>
-                    <p>Deploy continuously from your GitHub repository onto Render's free tier with automated builds</p>
+                    <p>
+                      Deploy continuously from your GitHub repository onto Render's free tier with
+                      automated builds
+                    </p>
                   </div>
                 </div>
                 <div class="publish-step-box">
                   <ol class="publish-instructions">
-                    <li>Push your code to your GitHub account:
+                    <li>
+                      Push your code to your GitHub account:
                       <div class="command-box mini">
                         <code>git push origin main</code>
-                        <button class="btn-copy-cmd" onclick="app.copyCommand('git push origin main', this)">Copy</button>
+                        <button
+                          class="btn-copy-cmd"
+                          onclick="app.copyCommand('git push origin main', this)"
+                        >
+                          Copy
+                        </button>
                       </div>
                     </li>
-                    <li>Go to <a href="https://dashboard.render.com" target="_blank" class="link-highlight">Render Dashboard</a> &rarr; <strong>New</strong> &rarr; <strong>Blueprint</strong>.</li>
-                    <li>Select this repository. Render automatically reads the included <code>render.yaml</code> and deploys your Vercel clone live with a free <code>onrender.com</code> HTTPS domain!</li>
+                    <li>
+                      Go to
+                      <a href="https://dashboard.render.com" target="_blank" class="link-highlight"
+                        >Render Dashboard</a
+                      >
+                      &rarr; <strong>New</strong> &rarr; <strong>Blueprint</strong>.
+                    </li>
+                    <li>
+                      Select this repository. Render automatically reads the included
+                      <code>render.yaml</code> and deploys your Vercel clone live with a free
+                      <code>onrender.com</code> HTTPS domain!
+                    </li>
                   </ol>
                 </div>
                 <div class="publish-actions-row">
@@ -684,22 +727,44 @@
                   <div class="publish-card-icon">🐳</div>
                   <div>
                     <h3>Koyeb, Railway & Docker</h3>
-                    <p>Run single-container or multi-container deployments on any modern cloud hosting service</p>
+                    <p>
+                      Run single-container or multi-container deployments on any modern cloud
+                      hosting service
+                    </p>
                   </div>
                 </div>
                 <div class="publish-step-box">
                   <div class="step-line-title">Docker single-container run command:</div>
                   <div class="command-box">
-                    <code>docker build -t vercel-clone . && docker run -p 3000:3000 vercel-clone</code>
-                    <button class="btn-copy-cmd" onclick="app.copyCommand('docker build -t vercel-clone . && docker run -p 3000:3000 vercel-clone', this)">Copy</button>
+                    <code
+                      >docker build -t vercel-clone . && docker run -p 3000:3000 vercel-clone</code
+                    >
+                    <button
+                      class="btn-copy-cmd"
+                      onclick="
+                        app.copyCommand(
+                          'docker build -t vercel-clone . && docker run -p 3000:3000 vercel-clone',
+                          this
+                        )
+                      "
+                    >
+                      Copy
+                    </button>
                   </div>
                   <p class="step-desc">
-                    The included <code>Dockerfile</code> packages Node.js 22 LTS, Git, builder workers, and the unified reverse proxy engine into an optimized production image.
+                    The included <code>Dockerfile</code> packages Node.js 22 LTS, Git, builder
+                    workers, and the unified reverse proxy engine into an optimized production
+                    image.
                   </p>
                 </div>
                 <div class="publish-features-list">
-                  <div class="feature-item">✔ <strong>Koyeb:</strong> Supports free nano tier with auto-detect Dockerfile</div>
-                  <div class="feature-item">✔ <strong>Railway:</strong> 1-click deploy from GitHub via Nixpacks or Dockerfile</div>
+                  <div class="feature-item">
+                    ✔ <strong>Koyeb:</strong> Supports free nano tier with auto-detect Dockerfile
+                  </div>
+                  <div class="feature-item">
+                    ✔ <strong>Railway:</strong> 1-click deploy from GitHub via Nixpacks or
+                    Dockerfile
+                  </div>
                 </div>
               </div>
             </div>
@@ -969,8 +1034,13 @@
                 <label class="form-label">Drag & Drop Project Folder or Files</label>
                 <div class="dropzone-box" id="dropzone-area">
                   <div class="dropzone-icon">📁</div>
-                  <div class="dropzone-text">Drop your project files or folder here, or <span class="browse-link">browse files</span></div>
-                  <div class="dropzone-sub">Supports HTML, CSS, JS, images, or pre-built production bundles</div>
+                  <div class="dropzone-text">
+                    Drop your project files or folder here, or
+                    <span class="browse-link">browse files</span>
+                  </div>
+                  <div class="dropzone-sub">
+                    Supports HTML, CSS, JS, images, or pre-built production bundles
+                  </div>
                   <input type="file" id="direct-file-input" multiple style="display: none" />
                 </div>
                 <div id="dropzone-file-status" class="file-status-box" style="display: none"></div>
@@ -984,7 +1054,10 @@
                   rows="4"
                   placeholder="<!DOCTYPE html><html><head><title>My Live App</title></head><body><h1>Hello World from Vercel Clone!</h1></body></html>"
                 ></textarea>
-                <span class="form-hint">Zero-configuration instant deploy: paste any HTML/CSS/JS snippet to launch live in 1 second.</span>
+                <span class="form-hint"
+                  >Zero-configuration instant deploy: paste any HTML/CSS/JS snippet to launch live
+                  in 1 second.</span
+                >
               </div>
             </div>
 
@@ -999,8 +1072,7 @@
                 required
               />
               <span class="form-hint"
-                >Preview URL:
-                <code id="slug-preview">/site/my-ecommerce-store/</code></span
+                >Preview URL: <code id="slug-preview">/site/my-ecommerce-store/</code></span
               >
             </div>
           </div>

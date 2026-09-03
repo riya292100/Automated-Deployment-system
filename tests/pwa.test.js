@@ -19,8 +19,8 @@ describe('Mobile App & PWA Infrastructure Suite', () => {
     expect(fs.existsSync(swPath)).toBe(true);
 
     const swContent = fs.readFileSync(swPath, 'utf8');
-    expect(swContent).toContain('addEventListener(\'install\'');
-    expect(swContent).toContain('addEventListener(\'fetch\'');
+    expect(swContent).toContain("addEventListener('install'");
+    expect(swContent).toContain("addEventListener('fetch'");
   });
 
   test('should have high-resolution mobile app icons', () => {

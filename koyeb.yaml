@@ -12,7 +12,7 @@ services:
         path: /
     env:
       - key: UNIFIED_SERVER
-        value: "true"
+        value: 'true'
       - key: STORAGE_MODE
         value: local
       - key: NODE_ENV

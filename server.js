@@ -1,5 +1,4 @@
 require('dotenv').config();
-const path = require('path');
 const apiApp = require('./api-server/index');
 const builder = require('./build-server/builder');
 const logger = require('./shared/logger').child('VercelServer');

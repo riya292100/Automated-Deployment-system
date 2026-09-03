@@ -16,6 +16,7 @@
 ## 🌟 Overview & What's New
 
 The **Vercel Cloud Clone** is a complete, production-grade automated deployment engine that replicates the core developer experience of **Vercel**:
+
 - **▲ Vercel-Grade Cloud Dashboard**: Modern dark-theme console with Active Project Cards, live ANSI build terminal streaming via Redis SSE, interactive architecture telemetry, and responsive device previewers (Desktop, Tablet, Mobile).
 - **🚀 100% Free Public Live Publishing**: Instantly share your running Vercel Clone publicly with zero fees, zero credit cards, and zero manual port forwarding via `npm run live`.
 - **☁️ Cloud Free-Tier Ready (Single-Port Architecture)**: Run on Render, Koyeb, Railway, Fly.io, or Docker with the unified server entry point (`server.js`) that automatically binds API, Web Console, and Reverse Proxy on a single `$PORT`.
@@ -36,15 +37,18 @@ Run one command in your terminal to start the platform and generate a public HTT
 ```bash
 npm run live
 ```
+
 or
+
 ```bash
 npm run tunnel
 ```
 
 **Output:**
+
 ```
 ================================================================
-       🎉 YOUR VERCEL CLONE IS LIVE AND ONLINE FOR FREE!        
+       🎉 YOUR VERCEL CLONE IS LIVE AND ONLINE FOR FREE!
 ================================================================
 
   🌐 Public Live URL:      https://xxxx.loca.lt
@@ -140,20 +144,25 @@ Or connect directly to Koyeb using [`koyeb.yaml`](koyeb.yaml) for a free contain
 ## 🚀 Local Quick Start
 
 ### 1. Install Dependencies
+
 ```bash
 npm install
 ```
 
 ### 2. Run in Unified Mode (Single Port 3000)
+
 ```bash
 npm run server
 ```
+
 Access the Vercel console at `http://localhost:3000`.
 
 ### 3. Run in Dual-Port Development Mode
+
 ```bash
 npm start
 ```
+
 - Web Console & API: `http://localhost:9000`
 - S3 Reverse Proxy: `http://localhost:8000`
 
@@ -186,7 +195,9 @@ npm run format
 ## 🔌 API Reference
 
 ### 1. Direct 1-Click Deployment
+
 `POST /api/deploy/direct`
+
 ```json
 {
   "projectName": "my-cool-site",
@@ -197,7 +208,9 @@ npm run format
   ]
 }
 ```
+
 **Response (202 Accepted):**
+
 ```json
 {
   "success": true,
@@ -208,7 +221,9 @@ npm run format
 ```
 
 ### 2. Git & Starter Template Deployment
+
 `POST /api/deploy`
+
 ```json
 {
   "gitUrl": "https://github.com/user/my-app.git",
@@ -220,14 +235,17 @@ npm run format
 ```
 
 ### 3. Live Log Stream (SSE)
+
 `GET /api/logs/:deploymentId`
 _Connects to real-time Server-Sent Events (SSE) log stream._
 
 ### 4. System Public Info
+
 `GET /api/system/public-info`
 _Returns platform version, storage mode, available starters, and feature flags._
 
 ### 5. Health Diagnostics
+
 `GET /api/health`
 _Returns health status of API Server, ECS Worker, S3 Storage, and Redis._
 

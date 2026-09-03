@@ -13,7 +13,7 @@ const globals = {
   setInterval: 'readonly',
   clearInterval: 'readonly',
 
-  // Browser globals
+  // Browser & Service Worker globals
   window: 'readonly',
   document: 'readonly',
   fetch: 'readonly',
@@ -21,6 +21,13 @@ const globals = {
   Event: 'readonly',
   alert: 'readonly',
   navigator: 'readonly',
+  FileReader: 'readonly',
+  self: 'readonly',
+  caches: 'readonly',
+  URL: 'readonly',
+  Response: 'readonly',
+  Request: 'readonly',
+  Headers: 'readonly',
 
   // Jest test globals
   describe: 'readonly',

@@ -1,7 +1,6 @@
 const request = require('supertest');
 const apiApp = require('../api-server/index');
 const builder = require('../build-server/builder');
-const storage = require('../shared/storage');
 
 describe('Unified Vercel Server & Direct Deployment Suite', () => {
   const directSlug = 'test-direct-vercel-app';
@@ -29,9 +28,7 @@ describe('Unified Vercel Server & Direct Deployment Suite', () => {
 
   describe('POST /api/deploy/direct', () => {
     test('should reject direct deployment without projectName', async () => {
-      const res = await request(apiApp)
-        .post('/api/deploy/direct')
-        .send({ html: '<h1>Test</h1>' });
+      const res = await request(apiApp).post('/api/deploy/direct').send({ html: '<h1>Test</h1>' });
       expect(res.status).toBe(400);
       expect(res.body.error).toContain('projectName');
     });
@@ -44,12 +41,10 @@ describe('Unified Vercel Server & Direct Deployment Suite', () => {
     });
 
     test('should accept direct deployment with html string', async () => {
-      const res = await request(apiApp)
-        .post('/api/deploy/direct')
-        .send({
-          projectName: 'my-direct-html-app',
-          html: '<!DOCTYPE html><html><body><h1>Instant Live Deploy</h1></body></html>',
-        });
+      const res = await request(apiApp).post('/api/deploy/direct').send({
+        projectName: 'my-direct-html-app',
+        html: '<!DOCTYPE html><html><body><h1>Instant Live Deploy</h1></body></html>',
+      });
       expect(res.status).toBe(202);
       expect(res.body.success).toBe(true);
       expect(res.body.projectSlug).toBe('my-direct-html-app');
@@ -62,7 +57,10 @@ describe('Unified Vercel Server & Direct Deployment Suite', () => {
         .send({
           projectName: 'my-direct-files-app',
           files: [
-            { path: 'index.html', content: '<!DOCTYPE html><html><body><h1>Files App</h1></body></html>' },
+            {
+              path: 'index.html',
+              content: '<!DOCTYPE html><html><body><h1>Files App</h1></body></html>',
+            },
             { path: 'style.css', content: 'body { margin: 0; }' },
           ],
         });

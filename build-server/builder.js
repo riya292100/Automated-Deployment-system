@@ -450,15 +450,7 @@ class BuildWorker {
    * Directly deploy uploaded files or code snippet (Vercel Drag & Drop style)
    */
   async executeDirectDeploy(payload) {
-    const {
-      deploymentId,
-      projectSlug,
-      files = [],
-      html,
-      css,
-      js,
-      baseUrl,
-    } = payload;
+    const { deploymentId, projectSlug, files = [], html, css, js, baseUrl } = payload;
 
     const startTime = Date.now();
     const buildFolder = path.join(this.tempWorkspaceDir, deploymentId);
@@ -527,7 +519,11 @@ class BuildWorker {
       await this.log(deploymentId, `⚡ Stack: [${stack.summary}]`, 'info');
 
       // Step 3: S3 Upload
-      await this.log(deploymentId, `\n☁️ [Step 3/4] Uploading assets to S3 edge storage...`, 'step');
+      await this.log(
+        deploymentId,
+        `\n☁️ [Step 3/4] Uploading assets to S3 edge storage...`,
+        'step'
+      );
       const s3Prefix = `__outputs/${projectSlug}`;
       let uploadedCount = 0;
       let totalBytes = 0;
