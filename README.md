@@ -3,6 +3,9 @@
 > **Full-Stack Autonomous Cloud Deployment Platform using Docker, AWS ECS Fargate, Amazon S3, Redis, and Reverse Proxy — with 1-Click Free Global Publishing**
 
 [![CI Pipeline](https://github.com/riya292100/Automated-Deployment-system/actions/workflows/ci.yml/badge.svg)](https://github.com/riya292100/Automated-Deployment-system/actions/workflows/ci.yml)
+[![Run on Google Cloud](https://deploy.cloud.run/button.svg)](https://deploy.cloud.run/?git_repo=https://github.com/riya292100/Automated-Deployment-system.git)
+[![Firebase](https://img.shields.io/badge/Google_Firebase-Spark_Free-FFCA28.svg?style=flat-square&logo=firebase&logoColor=black)](https://firebase.google.com/)
+[![Android WebAPK](<https://img.shields.io/badge/Google_Android-Native_WebAPK_(Free)-34A853?style=flat-square&logo=android&logoColor=white>)](https://web.dev/webapks/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-7.0-3178c6.svg?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Node.js Version](https://img.shields.io/badge/Node.js-%3E%3D22%20LTS-339933.svg?style=flat-square&logo=nodedotjs)](https://nodejs.org)
 [![Coverage Status](https://img.shields.io/badge/Coverage-100%25%20Passing-brightgreen.svg?style=flat-square)](https://github.com/riya292100/Automated-Deployment-system)
@@ -92,6 +95,47 @@ docker run -p 3000:3000 -e UNIFIED_SERVER=true vercel-clone
 ```
 
 Or connect directly to Koyeb using [`koyeb.yaml`](koyeb.yaml) for a free containerized cloud instance.
+
+---
+
+### Method 4: 1-Click Deploy to Google Cloud Run (Free Tier - 2M req/month)
+
+Deploy the entire full-stack platform (API, Web Console, Reverse Proxy) on Google's globally managed container infrastructure completely free:
+
+[![Run on Google Cloud](https://deploy.cloud.run/button.svg)](https://deploy.cloud.run/?git_repo=https://github.com/riya292100/Automated-Deployment-system.git)
+
+```bash
+# Or deploy with 1 command via Google Cloud SDK:
+gcloud run deploy automated-deployment-system --source . --allow-unauthenticated
+```
+
+- **Free Tier Allowance**: **2,000,000 requests/month**, 360,000 GB-seconds memory, 180,000 vCPU-seconds at **$0.00 cost**.
+- Automated HTTPS with free Google SSL certificates.
+
+---
+
+### Method 5: Deploy to Google Firebase Hosting (Free Web & CDN)
+
+Host the Vercel Clone dashboard and PWA on Google's SSD-backed worldwide CDN:
+
+```bash
+# Deploy with Firebase CLI
+npm install -g firebase-tools
+firebase login
+firebase deploy --only hosting
+```
+
+Instantly live at `https://<project-id>.web.app` and `https://<project-id>.firebaseapp.com` at **$0.00 cost** on the Firebase Spark Free Plan.
+
+---
+
+### Method 6: Google WebAPK & Android Mobile App (100% Free)
+
+Open your deployed URL in Google Chrome on any Android smartphone. Google Chrome detects [`dashboard/manifest.json`](dashboard/manifest.json) and automatically prompts **"Add to Home Screen"** or **"Install app"**.
+
+Google's WebAPK Minting Server automatically packages and signs an Android APK that installs directly onto your phone with an app icon, splash screen, and full-screen experience **without paying the $25 Google Play Store fee**.
+
+> 📖 **Full Guide**: For detailed step-by-step instructions across Google Cloud Run, Firebase Hosting, WebAPK, Google Play Console (TWA), and Google Search indexing, see [**`docs/GOOGLE_PUBLISHING_GUIDE.md`**](docs/GOOGLE_PUBLISHING_GUIDE.md).
 
 ---
 

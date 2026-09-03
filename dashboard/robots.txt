@@ -1,0 +1,7 @@
+# Googlebot & Web Crawlers Configuration
+User-agent: *
+Allow: /
+Disallow: /api/
+
+# Google Sitemap
+Sitemap: https://automated-deployment-system.web.app/sitemap.xml

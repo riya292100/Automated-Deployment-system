@@ -1,0 +1,80 @@
+name: Google Cloud & Firebase Continuous Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Deployment Target'
+        required: true
+        default: 'both'
+        type: choice
+        options:
+          - 'both'
+          - 'cloud-run'
+          - 'firebase-hosting'
+
+jobs:
+  deploy-google-cloud-run:
+    name: Deploy to Google Cloud Run (Free Tier)
+    if: inputs.target == 'both' || inputs.target == 'cloud-run'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        if: env.GCP_SA_KEY != ''
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+        env:
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Google Cloud SDK
+        if: env.GCP_SA_KEY != ''
+        uses: google-github-actions/setup-gcloud@v2
+        env:
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Build and Push Docker Image to Google Artifact / Container Registry
+        if: env.GCP_SA_KEY != ''
+        run: |
+          gcloud auth configure-docker --quiet
+          docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/automated-deployment-system:${{ github.sha }} .
+          docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/automated-deployment-system:${{ github.sha }}
+        env:
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Deploy to Cloud Run Free Tier
+        if: env.GCP_SA_KEY != ''
+        run: |
+          gcloud run deploy automated-deployment-system \
+            --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/automated-deployment-system:${{ github.sha }} \
+            --region us-central1 \
+            --platform managed \
+            --allow-unauthenticated \
+            --memory 512Mi \
+            --cpu 1 \
+            --set-env-vars NODE_ENV=production,UNIFIED_SERVER=true,STORAGE_MODE=local
+        env:
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+
+  deploy-firebase-hosting:
+    name: Deploy to Google Firebase Hosting (Free Web Tier)
+    if: inputs.target == 'both' || inputs.target == 'firebase-hosting'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+
+      - name: Deploy to Firebase Hosting
+        if: env.FIREBASE_TOKEN != ''
+        run: |
+          npx -y firebase-tools deploy --only hosting --token "${{ secrets.FIREBASE_TOKEN }}"
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
