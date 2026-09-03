@@ -40,5 +40,10 @@ jobs:
       - name: Run Test Suite with Coverage
         run: npm run test:coverage
 
+      - name: Verify Offline Test Run
+        run: |
+          unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_REGION AWS_S3_BUCKET REDIS_URL
+          npm test
+
       - name: Security Dependency Audit
         run: npm audit --audit-level=high
