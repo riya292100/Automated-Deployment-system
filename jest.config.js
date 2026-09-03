@@ -3,18 +3,19 @@ module.exports = {
   coverageDirectory: 'coverage',
   collectCoverageFrom: [
     'api-server/**/*.js',
-    'build-server/builder.js',
+    'build-server/**/*.js',
     'shared/**/*.js',
     's3-reverse-proxy/**/*.js',
     '!**/node_modules/**',
     '!temp-builds/**',
+    '!build-server/index.js',
   ],
   coverageThreshold: {
     global: {
-      branches: 45,
+      branches: 60,
       functions: 60,
       lines: 70,
-      statements: 65,
+      statements: 70,
     },
   },
   testMatch: ['**/tests/**/*.test.js'],
