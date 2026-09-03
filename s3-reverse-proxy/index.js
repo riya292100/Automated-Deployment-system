@@ -35,7 +35,7 @@ app.get('/health', (_req, res) => {
 /**
  * Main reverse proxy request handler (can be used as standalone middleware or mounted in unified server)
  */
-async function handleProxyRequest(req, res, _next) {
+async function handleProxyRequest(req, res, next) {
   try {
     let projectSlug = null;
     let filePath = req.path;
@@ -77,10 +77,17 @@ async function handleProxyRequest(req, res, _next) {
       }
     }
 
+    // If route was triggered by host header and not /site/:slug/, but no project was registered,
+    // fall through to the dashboard and API routes
+    const isExplicitSitePath = req.path.startsWith('/site/');
+    if (!isExplicitSitePath && !projectInfo && typeof next === 'function') {
+      return next();
+    }
+
     const s3Prefix =
       projectInfo && projectInfo.s3Prefix ? projectInfo.s3Prefix : `__outputs/${projectSlug}`;
     const cleanFilePath = filePath.replace(/^\/+/, '');
-    let targetKey = `${s3Prefix}/${cleanFilePath}`;
+    let targetKey = `${s3Prefix.replace(/\/$/, '')}/${cleanFilePath}`;
 
     try {
       // Attempt to fetch requested file from S3
