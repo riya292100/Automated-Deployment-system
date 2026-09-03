@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2026-09-03
+
+### Added
+
+- **Modular Route Controllers**: Decomposed monolithic `api-server/index.js` into focused routers (`routes/deploy.js`, `routes/logs.js`, `routes/deployments.js`, `routes/system.js`), bringing main entrypoint down to under 65 LOC.
+- **Framework Detection Engine Module**: Extracted `build-server/detectFramework.js` containing stack detection heuristics, recursive copy helpers, and asset writer utilities, bringing `builder.js` down to under 485 LOC.
+- **Strict Zod Direct Deployment Validation**: Added `directDeploySchema` and `deploymentIdParamSchema` ensuring comprehensive request sanitization on drag & drop file uploads and route params.
+- **Sentry & Error Tracking Hook**: Added structured error forwarding to `shared/logger.js` supporting `SENTRY_DSN` and dynamic callback hooks (`logger.setErrorHook`).
+- **Comprehensive Test Breadth**: Added 4 new test suites (`tests/builder-detect.test.js`, `tests/proxy.test.js`, `tests/logger.test.js`, `tests/deployments.test.js`), bringing test suite to 10 spec files and 92 passing unit tests.
+- **Enforced Coverage Threshold**: Configured Jest coverage thresholds at global 70% lines, 70% statements, 60% branches, and 60% functions with build-gate failure.
+- **Environment Completeness**: Fully populated `.env.example` with all 14 previously undocumented environment variables and added offline test documentation to `README.md`.
+
+### Changed
+
+- **CI/CD Offline Test Verification**: Added an explicit offline test step in `.github/workflows/ci.yml` verifying zero-cloud isolation by unsetting all AWS and Redis credentials.
+
 ## [1.2.0] - 2026-09-01
 
 ### Added

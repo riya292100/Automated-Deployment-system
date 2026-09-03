@@ -212,15 +212,33 @@ npm start
 
 ---
 
-## 🧪 Testing & Code Quality
+## 🛡️ Running Tests Without Cloud Accounts (100% Offline)
 
-The repository features 100% passing tests across 5 test suites covering API endpoints, reverse proxy routing, builder workers, storage, and Redis emulation:
+This repository is **fully self-contained** and designed to execute all builds, tests, and reverse proxy edge requests with **zero cloud accounts** and **zero external dependencies**:
+
+- **No AWS Account Required**: Storage automatically defaults to `STORAGE_MODE=local`, which uses an in-memory & local disk S3 emulator that fully replicates Amazon S3 `PutObject`, `GetObject`, and `ListObjectsV2` APIs.
+- **No Redis Server Required**: `shared/redis-client.js` provides an in-memory Redis emulation engine supporting Pub/Sub streams, channel event listeners, key-value storage, and hashes without any local Redis service installed.
+- **No `.env` File Required for Tests**: All 10 test suites run out-of-the-box on a clean checkout:
+
+```bash
+# Run tests in 100% isolated offline mode
+npm test
+
+# Enforce strict code coverage thresholds (>70% lines, >60% branches)
+npm run test:coverage
+```
+
+---
+
+## 🧪 Testing, Code Quality & Observability
+
+The repository features 10 test suites with 90+ tests covering API controllers, framework detection, S3 reverse proxy routing, builder workers, storage, and Redis emulation:
 
 ```bash
 # Run full automated test suite
 npm test
 
-# Run tests with test coverage reporting
+# Run tests with enforced coverage thresholds
 npm run test:coverage
 
 # TypeScript typecheck
@@ -233,6 +251,11 @@ npm run lint:fix
 # Format with Prettier
 npm run format
 ```
+
+### Structured Observability & Error Tracking
+
+- **Log Formatting**: Configure `LOG_FORMAT=json` for JSON production output or `LOG_FORMAT=text` for human-readable console output.
+- **Sentry Error Tracking**: Supply `SENTRY_DSN=https://...` in `.env` to automatically forward unhandled errors and warnings, or attach a custom hook via `logger.setErrorHook(fn)`.
 
 ---
 

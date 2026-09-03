@@ -1,6 +1,6 @@
 {
   "name": "automated-deployment-system",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Production-grade Automated Deployment System with AWS ECS, S3, Redis, Reverse Proxy, and Interactive Dashboard",
   "main": "start-all.js",
   "type": "commonjs",
