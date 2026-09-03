@@ -8,12 +8,31 @@ const redis = require('../shared/redis-client');
 const builder = require('../build-server/builder');
 const logger = require('../shared/logger').child('APIServer');
 const { deploySchema, storageConfigSchema, redeployParamsSchema } = require('./schemas');
+const proxyApp = require('../s3-reverse-proxy/index');
 
 const app = express();
 const PORT = process.env.API_PORT || 9000;
 
 app.use(cors());
 app.use(express.json());
+
+// Edge Reverse Proxy for path-based deployments (/site/:slug/*) and custom subdomains
+app.use((req, res, next) => {
+  if (req.path.startsWith('/site/')) {
+    return proxyApp.handleProxyRequest(req, res, next);
+  }
+  const host = req.hostname || req.headers.host || '';
+  const hostParts = host.split('.');
+  if (
+    hostParts.length > 1 &&
+    hostParts[0] !== 'localhost' &&
+    hostParts[0] !== '127' &&
+    !req.path.startsWith('/api')
+  ) {
+    return proxyApp.handleProxyRequest(req, res, next);
+  }
+  next();
+});
 
 // Serve Dashboard Web Application
 app.use(express.static(path.resolve(__dirname, '../dashboard')));
@@ -34,6 +53,23 @@ app.use((req, res, next) => {
   requestMetrics.endpoints[route] = (requestMetrics.endpoints[route] || 0) + 1;
   next();
 });
+
+function getBaseUrl(req) {
+  if (process.env.BASE_URL) return process.env.BASE_URL.replace(/\/$/, '');
+  const proto = req.headers['x-forwarded-proto'] || req.protocol || 'http';
+  const host = req.headers['x-forwarded-host'] || req.get('host');
+  const isUnified =
+    process.env.UNIFIED_SERVER === 'true' ||
+    process.env.PORT ||
+    !process.env.PROXY_PORT ||
+    process.env.PROXY_PORT === process.env.API_PORT;
+
+  if (!isUnified && host && host.includes('localhost')) {
+    const proxyPort = process.env.PROXY_PORT || 8000;
+    return `${proto}://localhost:${proxyPort}`;
+  }
+  return `${proto}://${host}`;
+}
 
 /**
  * Trigger new project deployment with Zod schema validation
@@ -65,6 +101,11 @@ app.post('/api/deploy', async (req, res) => {
     const deploymentId = `dep-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`;
     _totalDeploymentsCount++;
 
+    const baseUrl = getBaseUrl(req);
+    const hostHeader = (req.headers['x-forwarded-host'] || req.get('host') || 'localhost').split(':')[0];
+    const previewUrl = `${baseUrl}/site/${projectSlug}/`;
+    const subdomainUrl = `${req.protocol || 'http'}://${projectSlug}.${hostHeader}${req.get('host') && req.get('host').includes(':') ? ':' + req.get('host').split(':')[1] : ''}/`;
+
     const payload = {
       deploymentId,
       projectSlug,
@@ -74,6 +115,7 @@ app.post('/api/deploy', async (req, res) => {
       buildCommand,
       installCommand,
       outputDir,
+      baseUrl,
     };
 
     logger.info(`Received deployment request for [${projectSlug}] (ID: ${deploymentId})`, {
@@ -100,8 +142,8 @@ app.post('/api/deploy', async (req, res) => {
       projectSlug,
       status: 'IN_PROGRESS',
       logsUrl: `/api/logs/${deploymentId}`,
-      previewUrl: `http://localhost:8000/site/${projectSlug}/`,
-      subdomainUrl: `http://${projectSlug}.localhost:8000/`,
+      previewUrl,
+      subdomainUrl,
     });
   } catch (error) {
     if (error instanceof ZodError) {
@@ -116,6 +158,103 @@ app.post('/api/deploy', async (req, res) => {
     logger.error('Failed to initialize deployment', { error: error.message });
     res.status(500).json({ error: 'Failed to initialize deployment', details: error.message });
   }
+});
+
+/**
+ * Direct file / HTML code deployment (Vercel Drag & Drop style)
+ * POST /api/deploy/direct
+ */
+app.post('/api/deploy/direct', async (req, res) => {
+  try {
+    const { projectName, files, html, css, js } = req.body;
+    if (!projectName) {
+      return res.status(400).json({ error: 'projectName is required' });
+    }
+    if ((!files || !files.length) && !html) {
+      return res.status(400).json({ error: 'Either files array or html content must be provided' });
+    }
+
+    const projectSlug = projectName
+      .toLowerCase()
+      .replace(/[^a-z0-9-_]/g, '-')
+      .replace(/-+/g, '-');
+    const deploymentId = `dep-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`;
+    _totalDeploymentsCount++;
+
+    const baseUrl = getBaseUrl(req);
+    const hostHeader = (req.headers['x-forwarded-host'] || req.get('host') || 'localhost').split(':')[0];
+    const previewUrl = `${baseUrl}/site/${projectSlug}/`;
+    const subdomainUrl = `${req.protocol || 'http'}://${projectSlug}.${hostHeader}${req.get('host') && req.get('host').includes(':') ? ':' + req.get('host').split(':')[1] : ''}/`;
+
+    const payload = {
+      deploymentId,
+      projectSlug,
+      files,
+      html,
+      css,
+      js,
+      baseUrl,
+    };
+
+    logger.info(`Received direct deployment request for [${projectSlug}] (ID: ${deploymentId})`);
+
+    builder
+      .executeDirectDeploy(payload)
+      .then(() => {
+        _successfulDeploymentsCount++;
+        logger.info(`Direct deployment ${deploymentId} completed successfully`);
+      })
+      .catch((err) => {
+        _failedDeploymentsCount++;
+        logger.error(`Direct deployment ${deploymentId} failed: ${err.message}`);
+      });
+
+    return res.status(202).json({
+      success: true,
+      message: 'Direct deployment queued and processing',
+      deploymentId,
+      projectSlug,
+      status: 'IN_PROGRESS',
+      logsUrl: `/api/logs/${deploymentId}`,
+      previewUrl,
+      subdomainUrl,
+    });
+  } catch (error) {
+    logger.error('Failed to process direct deployment', { error: error.message });
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * System Public Info & Cloud Status
+ * GET /api/system/public-info
+ */
+app.get('/api/system/public-info', (req, res) => {
+  const baseUrl = getBaseUrl(req);
+  res.json({
+    name: 'Vercel Cloud Platform Clone',
+    version: '2.0.0',
+    baseUrl,
+    tunnelUrl: process.env.TUNNEL_URL || null,
+    storageMode: storage.getMode(),
+    isUnified:
+      process.env.UNIFIED_SERVER === 'true' ||
+      !!process.env.PORT ||
+      process.env.PROXY_PORT === process.env.API_PORT,
+    ports: {
+      api: process.env.PORT || PORT,
+      proxy: process.env.PROXY_PORT || 8000,
+    },
+    features: {
+      gitDeploy: true,
+      starterTemplates: true,
+      directDropDeploy: true,
+      streamingLogs: true,
+      edgeReverseProxy: true,
+      s3Storage: true,
+      redisCache: true,
+    },
+  });
 });
 
 /**

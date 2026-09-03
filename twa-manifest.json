@@ -1,0 +1,20 @@
+{
+  "packageId": "com.vercelclone.twa",
+  "host": "localhost",
+  "name": "Vercel Cloud Console",
+  "launcherName": "Vercel Clone",
+  "themeColor": "#000000",
+  "navigationColor": "#0a0e17",
+  "backgroundColor": "#0a0e17",
+  "enableNotifications": true,
+  "startUrl": "/",
+  "iconUrl": "/icons/icon-512.png",
+  "maskableIconUrl": "/icons/icon-maskable.png",
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "signingKey": {
+    "alias": "android",
+    "keyStorePath": "android.keystore"
+  },
+  "generatorApp": "bubblewrap-cli"
+}

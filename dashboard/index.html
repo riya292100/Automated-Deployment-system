@@ -3,7 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Automated Deployment System | Cloud Orchestrator</title>
+    <title>▲ Vercel Cloud Clone | Autonomous Deployment Platform</title>
+    <meta name="theme-color" content="#000000" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Vercel Clone" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
     <link rel="stylesheet" href="style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -21,10 +28,10 @@
       <!-- Sidebar Navigation -->
       <aside class="sidebar">
         <div class="brand">
-          <div class="brand-icon">⚡</div>
+          <div class="brand-icon vercel-brand-icon">▲</div>
           <div class="brand-text">
-            <span class="brand-title">AutoDeploy</span>
-            <span class="brand-badge">AWS • ECS • S3</span>
+            <span class="brand-title">Vercel</span>
+            <span class="brand-badge">Cloud Platform</span>
           </div>
         </div>
 
@@ -32,10 +39,6 @@
           <button class="nav-item active" data-tab="overview">
             <span class="nav-icon">📊</span>
             <span>Deployments</span>
-          </button>
-          <button class="nav-item" data-tab="architecture">
-            <span class="nav-icon">🗺️</span>
-            <span>Architecture & DFD</span>
           </button>
           <button class="nav-item" data-tab="terminal">
             <span class="nav-icon">💻</span>
@@ -45,6 +48,15 @@
           <button class="nav-item" data-tab="preview">
             <span class="nav-icon">👁️</span>
             <span>Site Preview</span>
+          </button>
+          <button class="nav-item" data-tab="publish">
+            <span class="nav-icon">🚀</span>
+            <span>Publish Free</span>
+            <span class="badge-new">FREE</span>
+          </button>
+          <button class="nav-item" data-tab="architecture">
+            <span class="nav-icon">🗺️</span>
+            <span>Architecture & DFD</span>
           </button>
           <button class="nav-item" data-tab="settings">
             <span class="nav-icon">⚙️</span>
@@ -81,15 +93,18 @@
           </div>
 
           <div class="topbar-actions">
+            <button class="btn btn-secondary" id="btn-publish-online" onclick="app.switchTab('publish')">
+              <span>🚀 Publish Free Online</span>
+            </button>
             <button class="btn btn-secondary" id="btn-health-check" onclick="app.checkHealth()">
-              <span>🔄 Health Check</span>
+              <span>🔄 Health</span>
             </button>
             <button
               class="btn btn-primary"
               id="btn-open-deploy-modal"
               onclick="app.openDeployModal()"
             >
-              <span>🚀 New Deployment</span>
+              <span>▲ New Deployment</span>
             </button>
           </div>
         </header>
@@ -136,6 +151,20 @@
                 <div class="kpi-label">Cache Hit Rate</div>
                 <div class="kpi-value" id="kpi-cache-hit">99.8%</div>
               </div>
+            </div>
+          </div>
+
+          <!-- Active Vercel Cloud Projects Grid -->
+          <div class="content-panel mb-24">
+            <div class="panel-header">
+              <div>
+                <h2>▲ Live Vercel Projects</h2>
+                <p class="panel-subtitle">Production deployments served across the edge network with instant S3 routing</p>
+              </div>
+              <button class="btn btn-sm btn-primary" onclick="app.openDeployModal()">+ New Project</button>
+            </div>
+            <div class="vercel-projects-grid" id="vercel-project-cards">
+              <!-- Rendered dynamically by app.deployments.renderVercelProjectCards -->
             </div>
           </div>
 
@@ -579,6 +608,104 @@
           </div>
         </section>
 
+        <!-- TAB: PUBLISH FREE ONLINE -->
+        <section id="tab-publish" class="tab-panel">
+          <div class="publish-container">
+            <div class="publish-hero">
+              <div class="publish-hero-badge">▲ 100% FREE CLOUD HOSTING & PUBLIC URLS</div>
+              <h2>Publish Your Vercel Clone Live Online</h2>
+              <p>
+                Get your automated deployment platform live on the public internet completely free with
+                instant global tunnels or 24/7 cloud deployments on Render, Koyeb, and Railway.
+              </p>
+            </div>
+
+            <div class="publish-methods-grid">
+              <!-- Method 1: Instant Quick Tunnel -->
+              <div class="publish-card primary">
+                <div class="publish-card-badge">RECOMMENDED • ZERO CONFIG</div>
+                <div class="publish-card-header">
+                  <div class="publish-card-icon">⚡</div>
+                  <div>
+                    <h3>1-Click Public Live URL (Tunnel)</h3>
+                    <p>Instant secure HTTPS URL accessible from any phone or PC worldwide (zero signup or DNS required)</p>
+                  </div>
+                </div>
+                <div class="publish-step-box">
+                  <div class="step-line-title">Run this single command in your project terminal:</div>
+                  <div class="command-box">
+                    <code>npm run live</code>
+                    <button class="btn-copy-cmd" onclick="app.copyCommand('npm run live', this)">Copy</button>
+                  </div>
+                  <p class="step-desc">
+                    Starts the unified Vercel platform and automatically connects a high-speed Cloudflare Quick Tunnel / Localtunnel with free HTTPS encryption.
+                  </p>
+                </div>
+                <div class="publish-features-list">
+                  <div class="feature-item">✔ <strong>Zero account needed:</strong> No credit card or registration required</div>
+                  <div class="feature-item">✔ <strong>Full functionality:</strong> Web Dashboard, REST API, SSE streaming logs, and reverse proxy work instantly</div>
+                  <div class="feature-item">✔ <strong>Mobile ready:</strong> Test your deployments on your phone or share with teammates immediately</div>
+                </div>
+              </div>
+
+              <!-- Method 2: Render.com 24/7 Free Cloud -->
+              <div class="publish-card">
+                <div class="publish-card-badge">24/7 FREE CLOUD HOSTING</div>
+                <div class="publish-card-header">
+                  <div class="publish-card-icon">☁️</div>
+                  <div>
+                    <h3>Deploy to Render (Free Web Service)</h3>
+                    <p>Deploy continuously from your GitHub repository onto Render's free tier with automated builds</p>
+                  </div>
+                </div>
+                <div class="publish-step-box">
+                  <ol class="publish-instructions">
+                    <li>Push your code to your GitHub account:
+                      <div class="command-box mini">
+                        <code>git push origin main</code>
+                        <button class="btn-copy-cmd" onclick="app.copyCommand('git push origin main', this)">Copy</button>
+                      </div>
+                    </li>
+                    <li>Go to <a href="https://dashboard.render.com" target="_blank" class="link-highlight">Render Dashboard</a> &rarr; <strong>New</strong> &rarr; <strong>Blueprint</strong>.</li>
+                    <li>Select this repository. Render automatically reads the included <code>render.yaml</code> and deploys your Vercel clone live with a free <code>onrender.com</code> HTTPS domain!</li>
+                  </ol>
+                </div>
+                <div class="publish-actions-row">
+                  <a href="https://render.com" target="_blank" class="btn btn-primary w-100">
+                    Open Render Dashboard &rarr;
+                  </a>
+                </div>
+              </div>
+
+              <!-- Method 3: Koyeb / Railway / Docker -->
+              <div class="publish-card">
+                <div class="publish-card-badge">CONTAINERIZED DEPLOYMENT</div>
+                <div class="publish-card-header">
+                  <div class="publish-card-icon">🐳</div>
+                  <div>
+                    <h3>Koyeb, Railway & Docker</h3>
+                    <p>Run single-container or multi-container deployments on any modern cloud hosting service</p>
+                  </div>
+                </div>
+                <div class="publish-step-box">
+                  <div class="step-line-title">Docker single-container run command:</div>
+                  <div class="command-box">
+                    <code>docker build -t vercel-clone . && docker run -p 3000:3000 vercel-clone</code>
+                    <button class="btn-copy-cmd" onclick="app.copyCommand('docker build -t vercel-clone . && docker run -p 3000:3000 vercel-clone', this)">Copy</button>
+                  </div>
+                  <p class="step-desc">
+                    The included <code>Dockerfile</code> packages Node.js 22 LTS, Git, builder workers, and the unified reverse proxy engine into an optimized production image.
+                  </p>
+                </div>
+                <div class="publish-features-list">
+                  <div class="feature-item">✔ <strong>Koyeb:</strong> Supports free nano tier with auto-detect Dockerfile</div>
+                  <div class="feature-item">✔ <strong>Railway:</strong> 1-click deploy from GitHub via Nixpacks or Dockerfile</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <!-- TAB 5: CLOUD SETTINGS -->
         <section id="tab-settings" class="tab-panel">
           <div class="content-panel max-w-700">
@@ -722,6 +849,14 @@
               >
                 🐙 Custom Git Repository
               </button>
+              <button
+                type="button"
+                class="toggle-tab"
+                id="tab-btn-direct"
+                onclick="app.setDeployType('direct')"
+              >
+                📂 Drag & Drop / HTML
+              </button>
             </div>
 
             <!-- Section A: Starter Template Select -->
@@ -828,6 +963,31 @@
               </div>
             </div>
 
+            <!-- Section C: Direct File & HTML Drag & Drop -->
+            <div id="section-direct-input" style="display: none">
+              <div class="form-group">
+                <label class="form-label">Drag & Drop Project Folder or Files</label>
+                <div class="dropzone-box" id="dropzone-area">
+                  <div class="dropzone-icon">📁</div>
+                  <div class="dropzone-text">Drop your project files or folder here, or <span class="browse-link">browse files</span></div>
+                  <div class="dropzone-sub">Supports HTML, CSS, JS, images, or pre-built production bundles</div>
+                  <input type="file" id="direct-file-input" multiple style="display: none" />
+                </div>
+                <div id="dropzone-file-status" class="file-status-box" style="display: none"></div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Or Paste HTML / Web Code Directly</label>
+                <textarea
+                  id="direct-html-input"
+                  class="form-control font-mono"
+                  rows="4"
+                  placeholder="<!DOCTYPE html><html><head><title>My Live App</title></head><body><h1>Hello World from Vercel Clone!</h1></body></html>"
+                ></textarea>
+                <span class="form-hint">Zero-configuration instant deploy: paste any HTML/CSS/JS snippet to launch live in 1 second.</span>
+              </div>
+            </div>
+
             <!-- Common Project Name Slug -->
             <div class="form-group">
               <label class="form-label">Project Name / Custom Slug</label>
@@ -840,7 +1000,7 @@
               />
               <span class="form-hint"
                 >Preview URL:
-                <code id="slug-preview">http://localhost:8000/site/my-ecommerce-store/</code></span
+                <code id="slug-preview">/site/my-ecommerce-store/</code></span
               >
             </div>
           </div>

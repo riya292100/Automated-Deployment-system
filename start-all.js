@@ -1,4 +1,11 @@
 require('dotenv').config();
+
+// If running in cloud environment (single PORT provided) or UNIFIED_SERVER set, delegate to server.js
+if (process.env.PORT || process.env.UNIFIED_SERVER === 'true') {
+  module.exports = require('./server');
+  return;
+}
+
 const apiApp = require('./api-server/index');
 const proxyApp = require('./s3-reverse-proxy/index');
 const builder = require('./build-server/builder');
@@ -8,7 +15,7 @@ const API_PORT = process.env.API_PORT || 9000;
 const PROXY_PORT = process.env.PROXY_PORT || 8000;
 
 console.log('================================================================');
-console.log('       🚀 AUTOMATED DEPLOYMENT SYSTEM - PLATFORM LAUNCHER       ');
+console.log('       ▲ VERCEL CLOUD CLONE - PLATFORM LAUNCHER                 ');
 console.log('       Docker • AWS ECS • Amazon S3 • Redis • Reverse Proxy     ');
 console.log('================================================================\n');
 

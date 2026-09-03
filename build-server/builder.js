@@ -327,7 +327,16 @@ class BuildWorker {
         `\n🌐 [Step 5/5] Registering edge routes in Reverse Proxy & Redis...`,
         'step'
       );
-      const deployedUrl = `http://localhost:8000/site/${projectSlug}/`;
+      const isUnified =
+        process.env.UNIFIED_SERVER === 'true' ||
+        process.env.PORT ||
+        !process.env.PROXY_PORT ||
+        process.env.PROXY_PORT === process.env.API_PORT;
+      const base =
+        deploymentPayload.baseUrl ||
+        process.env.BASE_URL ||
+        (isUnified ? '' : `http://localhost:${process.env.PROXY_PORT || 8000}`);
+      const deployedUrl = `${base.replace(/\/$/, '')}/site/${projectSlug}/`;
       const durationMs = Date.now() - startTime;
 
       const deployInfo = {
@@ -434,6 +443,184 @@ class BuildWorker {
       } else {
         fs.copyFileSync(srcPath, destPath);
       }
+    }
+  }
+
+  /**
+   * Directly deploy uploaded files or code snippet (Vercel Drag & Drop style)
+   */
+  async executeDirectDeploy(payload) {
+    const {
+      deploymentId,
+      projectSlug,
+      files = [],
+      html,
+      css,
+      js,
+      baseUrl,
+    } = payload;
+
+    const startTime = Date.now();
+    const buildFolder = path.join(this.tempWorkspaceDir, deploymentId);
+
+    try {
+      if (!fs.existsSync(buildFolder)) {
+        fs.mkdirSync(buildFolder, { recursive: true });
+      }
+
+      await this.updateDeploymentStatus(deploymentId, projectSlug, 'IN_PROGRESS', {
+        startedAt: new Date().toISOString(),
+        gitUrl: 'direct-upload',
+        branch: 'main',
+      });
+
+      await this.log(
+        deploymentId,
+        `🚀 Direct Deploy Task initialized for [${projectSlug}] (ID: ${deploymentId})`,
+        'system'
+      );
+      await this.log(
+        deploymentId,
+        `📍 Storage Mode: ${storage.getMode().toUpperCase()} | Prefix: __outputs/${projectSlug}/`,
+        'system'
+      );
+
+      // Step 1: Write files
+      await this.log(deploymentId, `\n📦 [Step 1/4] Processing direct files...`, 'step');
+      let writtenFilesCount = 0;
+
+      if (Array.isArray(files) && files.length > 0) {
+        for (const file of files) {
+          const safeRelPath = (file.path || file.name || 'index.html')
+            .replace(/^(\.\.[\/\\])+/, '')
+            .replace(/^\/+/, '');
+          const destPath = path.join(buildFolder, safeRelPath);
+          const dir = path.dirname(destPath);
+          if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+          fs.writeFileSync(destPath, file.content || '');
+          writtenFilesCount++;
+        }
+      } else if (html) {
+        fs.writeFileSync(path.join(buildFolder, 'index.html'), html);
+        writtenFilesCount++;
+        if (css) {
+          fs.writeFileSync(path.join(buildFolder, 'style.css'), css);
+          writtenFilesCount++;
+        }
+        if (js) {
+          fs.writeFileSync(path.join(buildFolder, 'main.js'), js);
+          writtenFilesCount++;
+        }
+      } else {
+        throw new Error('No files or HTML content provided for direct deployment.');
+      }
+
+      await this.log(
+        deploymentId,
+        `✔ Wrote ${writtenFilesCount} source files into workspace.`,
+        'success'
+      );
+
+      // Step 2: Language detection
+      await this.log(deploymentId, `\n⚙️ [Step 2/4] Inspecting deployment stack...`, 'step');
+      const stack = this.detectLanguageAndFramework(buildFolder);
+      await this.log(deploymentId, `⚡ Stack: [${stack.summary}]`, 'info');
+
+      // Step 3: S3 Upload
+      await this.log(deploymentId, `\n☁️ [Step 3/4] Uploading assets to S3 edge storage...`, 'step');
+      const s3Prefix = `__outputs/${projectSlug}`;
+      let uploadedCount = 0;
+      let totalBytes = 0;
+
+      await storage.uploadDirectory(buildFolder, s3Prefix, (key, size) => {
+        uploadedCount++;
+        totalBytes += size;
+        this.log(
+          deploymentId,
+          `  ⬆ [S3 PutObject] ${key} (${(size / 1024).toFixed(1)} KB)`,
+          'upload'
+        );
+      });
+
+      await this.log(
+        deploymentId,
+        `✔ Upload complete! ${uploadedCount} assets transferred to S3 (${(totalBytes / 1024).toFixed(1)} KB total).`,
+        'success'
+      );
+
+      // Step 4: Register route
+      await this.log(
+        deploymentId,
+        `\n🌐 [Step 4/4] Registering edge routes in Reverse Proxy & Redis...`,
+        'step'
+      );
+      const isUnified =
+        process.env.UNIFIED_SERVER === 'true' ||
+        process.env.PORT ||
+        !process.env.PROXY_PORT ||
+        process.env.PROXY_PORT === process.env.API_PORT;
+      const base =
+        baseUrl ||
+        process.env.BASE_URL ||
+        (isUnified ? '' : `http://localhost:${process.env.PROXY_PORT || 8000}`);
+      const deployedUrl = `${base.replace(/\/$/, '')}/site/${projectSlug}/`;
+      const durationMs = Date.now() - startTime;
+
+      const deployInfo = {
+        deploymentId,
+        projectSlug,
+        status: 'READY',
+        url: deployedUrl,
+        s3Prefix,
+        fileCount: uploadedCount,
+        totalBytes,
+        durationMs,
+        completedAt: new Date().toISOString(),
+        gitUrl: 'direct-upload',
+        branch: 'main',
+        stack: stack.summary,
+        language: stack.language,
+        framework: stack.framework,
+      };
+
+      await redis.set(`project:${projectSlug}`, deployInfo);
+      await redis.set(`deployment:${deploymentId}`, deployInfo);
+      await this.updateDeploymentStatus(deploymentId, projectSlug, 'READY', deployInfo);
+
+      await this.log(deploymentId, `\n🎉 [DEPLOYMENT SUCCESSFUL]`, 'complete');
+      await this.log(deploymentId, `🔗 Access Live URL: ${deployedUrl}`, 'link');
+      await this.log(
+        deploymentId,
+        `⏱️ Total deployment time: ${(durationMs / 1000).toFixed(2)}s`,
+        'system'
+      );
+
+      try {
+        fs.rmSync(buildFolder, { recursive: true, force: true });
+      } catch (_e) {}
+
+      return deployInfo;
+    } catch (error) {
+      const durationMs = Date.now() - startTime;
+      await this.log(deploymentId, `\n❌ [DEPLOYMENT FAILED]: ${error.message}`, 'error');
+
+      const failedInfo = {
+        deploymentId,
+        projectSlug,
+        status: 'FAILED',
+        error: error.message,
+        durationMs,
+        completedAt: new Date().toISOString(),
+      };
+
+      await redis.set(`deployment:${deploymentId}`, failedInfo);
+      await this.updateDeploymentStatus(deploymentId, projectSlug, 'FAILED', failedInfo);
+
+      try {
+        fs.rmSync(buildFolder, { recursive: true, force: true });
+      } catch (_e) {}
+
+      throw error;
     }
   }
 }

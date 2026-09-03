@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: vercel-cloud-clone
+    env: node
+    plan: free
+    region: oregon
+    buildCommand: npm install --omit=dev
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: UNIFIED_SERVER
+        value: "true"
+      - key: STORAGE_MODE
+        value: local

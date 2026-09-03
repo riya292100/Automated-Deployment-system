@@ -1,0 +1,19 @@
+name: vercel-cloud-clone
+services:
+  - name: vercel-clone-web
+    type: web
+    git:
+      branch: main
+      build_command: npm install --omit=dev
+      run_command: node server.js
+    instance_type: nano
+    ports:
+      - port: 3000
+        path: /
+    env:
+      - key: UNIFIED_SERVER
+        value: "true"
+      - key: STORAGE_MODE
+        value: local
+      - key: NODE_ENV
+        value: production

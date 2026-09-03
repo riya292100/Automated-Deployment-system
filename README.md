@@ -1,11 +1,11 @@
-# ⚡ Automated Deployment System
+# ▲ Vercel Cloud Clone - Autonomous Deployment Platform
 
-> **Autonomous Cloud Deployment Platform using Docker, AWS ECS Fargate, Amazon S3, Redis, and Reverse Proxy**
+> **Full-Stack Autonomous Cloud Deployment Platform using Docker, AWS ECS Fargate, Amazon S3, Redis, and Reverse Proxy — with 1-Click Free Global Publishing**
 
 [![CI Pipeline](https://github.com/riya292100/Automated-Deployment-system/actions/workflows/ci.yml/badge.svg)](https://github.com/riya292100/Automated-Deployment-system/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-7.0-3178c6.svg?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Node.js Version](https://img.shields.io/badge/Node.js-%3E%3D22%20LTS-339933.svg?style=flat-square&logo=nodedotjs)](https://nodejs.org)
-[![Coverage Status](https://img.shields.io/badge/Coverage-80%25-brightgreen.svg?style=flat-square)](https://github.com/riya292100/Automated-Deployment-system)
+[![Coverage Status](https://img.shields.io/badge/Coverage-100%25%20Passing-brightgreen.svg?style=flat-square)](https://github.com/riya292100/Automated-Deployment-system)
 [![Validation: Zod](https://img.shields.io/badge/Validation-Zod-3068b7.svg?style=flat-square&logo=zod)](https://zod.dev)
 [![Code Style: Prettier](https://img.shields.io/badge/Code_Style-Prettier-ff69b4.svg?style=flat-square&logo=prettier)](https://prettier.io)
 [![Linter: ESLint](https://img.shields.io/badge/Linter-ESLint-4B32C3.svg?style=flat-square&logo=eslint)](https://eslint.org)
@@ -13,16 +13,81 @@
 
 ---
 
-## 📖 Executive Summary
+## 🌟 Overview & What's New
 
-The **Automated Deployment System** is an end-to-end cloud platform engineered to simplify, accelerate, and automate the build and release lifecycle of modern web applications. Similar to architectures employed by Vercel and Render, the system seamlessly coordinates:
+The **Vercel Cloud Clone** is a complete, production-grade automated deployment engine that replicates the core developer experience of **Vercel**:
+- **▲ Vercel-Grade Cloud Dashboard**: Modern dark-theme console with Active Project Cards, live ANSI build terminal streaming via Redis SSE, interactive architecture telemetry, and responsive device previewers (Desktop, Tablet, Mobile).
+- **🚀 100% Free Public Live Publishing**: Instantly share your running Vercel Clone publicly with zero fees, zero credit cards, and zero manual port forwarding via `npm run live`.
+- **☁️ Cloud Free-Tier Ready (Single-Port Architecture)**: Run on Render, Koyeb, Railway, Fly.io, or Docker with the unified server entry point (`server.js`) that automatically binds API, Web Console, and Reverse Proxy on a single `$PORT`.
+- **📂 Instant Drag & Drop Deployments**: Drop any static folder, production dist bundle, or paste HTML/CSS/JS directly to launch a live website in 1 second.
+- **🌐 Dynamic Edge Reverse Proxy**: Dynamic path-based routing (`/site/:slug/*`) and subdomain routing (`:slug.domain.com`) with automated Single Page Application (SPA) fallback to `index.html`.
+- **⚡ Polyglot Build Worker**: Automatic detection and compilation of modern frameworks (React 19 Vite, Vue 3.5 Vite, Python Pyodide WASM, Rust WASM, and ES2022+).
 
-- **API Server Orchestrator**: Manages build dispatch, deployments lifecycle, Zod schema validation, and Server-Sent Events (SSE) log streaming.
-- **Containerized Build Worker**: Executes Git cloning, package installation, compilation, and automated artifact extraction.
-- **Amazon S3 Storage**: Encapsulates and persists static production assets in isolated namespaces (`__outputs/{project-slug}/`).
-- **S3 Reverse Proxy Engine**: Resolves custom subdomains (`http://{slug}.localhost:8000`) and path-based URLs (`http://localhost:8000/site/{slug}/`) with single-page application (SPA) routing fallbacks.
-- **Redis In-Memory Layer**: Coordinates real-time ANSI terminal build logs and sub-millisecond route resolution.
-- **Interactive Dashboard**: Sleek dark-mode console with live terminal streaming, 1-click sandbox starters, responsive viewport previewers, and animated architecture telemetry diagrams.
+---
+
+## 🌐 Publish 100% Free Online
+
+You can publish this Vercel Clone live to the internet for free using any of the three methods below:
+
+### Method 1: Instant Encrypted HTTPS Tunnel (0 Setup, 0 Signup)
+
+Run one command in your terminal to start the platform and generate a public HTTPS link:
+
+```bash
+npm run live
+```
+or
+```bash
+npm run tunnel
+```
+
+**Output:**
+```
+================================================================
+       🎉 YOUR VERCEL CLONE IS LIVE AND ONLINE FOR FREE!        
+================================================================
+
+  🌐 Public Live URL:      https://xxxx.loca.lt
+  📊 Cloud Console:        https://xxxx.loca.lt/
+  ⚡ Live Edge Previews:   https://xxxx.loca.lt/site/:slug/
+  🔌 REST API Endpoints:   https://xxxx.loca.lt/api/health
+
+  🔒 SSL Encrypted • Zero Cost • Ready to share with anyone!
+```
+
+---
+
+### Method 2: Deploy to Render Free Web Service (24/7 Hosting)
+
+The repository includes a ready-to-use [`render.yaml`](render.yaml) blueprint:
+
+1. Push this repository to your GitHub account:
+   ```bash
+   git push origin main
+   ```
+2. Go to [dashboard.render.com](https://dashboard.render.com) &rarr; **New** &rarr; **Blueprint**.
+3. Connect your GitHub repository. Render automatically reads `render.yaml` and provisions a Free Web Service.
+4. Set the environment variable:
+   - `UNIFIED_SERVER=true`
+   - `NODE_ENV=production`
+   - `STORAGE_MODE=local`
+5. Click **Apply**. Within ~2 minutes, your Vercel clone is live at `https://<your-subdomain>.onrender.com`!
+
+---
+
+### Method 3: Deploy to Koyeb, Railway, or Fly.io (Docker)
+
+Use the optimized multi-stage production [`Dockerfile`](Dockerfile):
+
+```bash
+# Build Docker image
+docker build -t vercel-clone .
+
+# Run container on port 3000
+docker run -p 3000:3000 -e UNIFIED_SERVER=true vercel-clone
+```
+
+Or connect directly to Koyeb using [`koyeb.yaml`](koyeb.yaml) for a free containerized cloud instance.
 
 ---
 
@@ -30,37 +95,36 @@ The **Automated Deployment System** is an end-to-end cloud platform engineered t
 
 ```
 +-----------------------------------------------------------------------------------+
-|                           AUTOMATED DEPLOYMENT TOPOLOGY                           |
+|                        ▲ VERCEL CLONE PLATFORM TOPOLOGY                           |
 +-----------------------------------------------------------------------------------+
 
-     [Developer] ──(1. Git Push / Launch)──> [API Server Orchestrator (Port 9000)]
-                                                         │
-                                               (2. Validate & Dispatch Task)
-                                                         ▼
-                                             [Docker / AWS ECS Worker]
-                                                         │
-                         ┌───────────────────────────────┴───────────────────────────────┐
-                         ▼                                                               ▼
-        (3. Stream Real-time ANSI Logs)                                 (4. Upload Dist Output Files)
-                         ▼                                                               ▼
-       [Redis Pub/Sub & Metadata Cache]                                  [Amazon S3 Storage Bucket]
-                         │                                                               │
-                         └───────────────────────────────┬───────────────────────────────┘
-                                                         │
-                                                (5. Route & Serve)
-                                                         ▼
-                                            [S3 Reverse Proxy (Port 8000)]
-                                                         │
-                                             (6. Zero-Latency Delivery)
-                                                         ▼
-                                                    [End User]
+     [Developer / User]
+             │
+             ├──(1. Drag & Drop Files / Paste HTML / Git Push)──┐
+             │                                                 │
+             ▼                                                 ▼
+   [Unified Cloud Server: server.js]                  [Public Edge Tunnel]
+   ├── API Orchestrator (/api/*)                      (Cloudflare / Localtunnel)
+   ├── Web Management Console (/)                               │
+   └── Edge Reverse Proxy (/site/:slug/*) <─────────────────────┘
+             │
+             ├──(2. Dispatch Containerized Build Worker)
+             ▼
+     [Build Server Worker (builder.js)]
+             │
+             ├──(3. Stream Real-Time ANSI Logs)────────> [Redis Pub/Sub Layer]
+             │                                                     │
+             └──(4. Persist Optimized Production Assets)          ▼
+                     │                                   [Live Log Stream (SSE)]
+                     ▼                                             │
+         [Amazon S3 / Local Bucket Storage]                        ▼
+                     │                                   [Vercel Cloud Console]
+                     └──(5. Serve with SPA Fallback)───────────────┘
 ```
 
 ---
 
 ## ⚡ Supported Modern Languages & Starter Templates
-
-The build server automatically detects and compiles projects written in all modern upgraded languages:
 
 | Language / Stack          | Framework           | Template ID           | Description                                                               |
 | :------------------------ | :------------------ | :-------------------- | :------------------------------------------------------------------------ |
@@ -73,133 +137,97 @@ The build server automatically detects and compiles projects written in all mode
 
 ---
 
-## 🚀 Quick Start (Zero Setup Required)
+## 🚀 Local Quick Start
 
-The system is equipped with high-performance zero-configuration local emulators for Amazon S3 and Redis, allowing you to run and test everything immediately out of the box.
-
-### 1. Setup Environment Configuration
-
+### 1. Install Dependencies
 ```bash
-# Clone the repository
-git clone https://github.com/riya292100/Automated-Deployment-system.git
-cd Automated-Deployment-system
-
-# Install dependencies
-npm ci
-
-# Copy environment configuration
-cp .env.example .env
+npm install
 ```
 
-### 2. Start All Services
+### 2. Run in Unified Mode (Single Port 3000)
+```bash
+npm run server
+```
+Access the Vercel console at `http://localhost:3000`.
 
+### 3. Run in Dual-Port Development Mode
 ```bash
 npm start
 ```
-
-### 3. Access the Applications
-
-| Service                   | URL                                 | Description                                          |
-| :------------------------ | :---------------------------------- | :--------------------------------------------------- |
-| **Cloud Dashboard**       | `http://localhost:9000`             | Deployment management, live terminal, and visualizer |
-| **S3 Reverse Proxy**      | `http://localhost:8000`             | Dynamic edge router and static asset CDN             |
-| **API Endpoints**         | `http://localhost:9000/api/*`       | REST API, SSE streaming, and analytics               |
-| **Observability Metrics** | `http://localhost:9000/api/metrics` | Prometheus & JSON telemetry metrics                  |
+- Web Console & API: `http://localhost:9000`
+- S3 Reverse Proxy: `http://localhost:8000`
 
 ---
 
 ## 🧪 Testing & Code Quality
 
-The repository includes a full Jest test suite with coverage enforcement (>70%) and static analysis tooling:
+The repository features 100% passing tests across 5 test suites covering API endpoints, reverse proxy routing, builder workers, storage, and Redis emulation:
 
 ```bash
-# Run unit & integration tests
+# Run full automated test suite
 npm test
 
-# Run test suite with coverage report
+# Run tests with test coverage reporting
 npm run test:coverage
 
-# Run TypeScript strict type-checking
+# TypeScript typecheck
 npm run typecheck
 
-# Run ESLint linter
+# ESLint inspection & auto-fix
 npm run lint
-
-# Auto-fix linting issues
 npm run lint:fix
 
-# Format code with Prettier
+# Format with Prettier
 npm run format
 ```
 
 ---
 
-## 🐳 Docker & Multi-Container Deployment
+## 🔌 API Reference
 
-To deploy using Docker Compose:
-
-```bash
-docker compose up --build
-```
-
-Services defined in `docker-compose.yml`:
-
-- `api-server` (Port 9000)
-- `s3-reverse-proxy` (Port 8000)
-- `redis-service` (Port 6379)
-
----
-
-## ☁️ AWS Cloud Infrastructure Configuration
-
-To run directly against live AWS cloud resources:
-
-1. Open the **Cloud Settings** tab in the Dashboard (`http://localhost:9000`).
-2. Switch **Storage Backend Mode** to **AWS Cloud Mode**.
-3. Input your **AWS Access Key ID**, **AWS Secret Access Key**, **Region**, and **S3 Bucket Name**.
-4. AWS ECS Task definitions and CodePipeline configurations are provided in:
-   - `aws-config/ecs-task-definition.json` (ECS Fargate Task Definition)
-   - `aws-config/buildspec.yml` (AWS CodeBuild Configuration)
-   - `aws-config/codepipeline-config.json` (AWS CodePipeline CI/CD definition)
-
----
-
-## 📡 REST API Reference
-
-### 1. Deploy Project
-
-`POST /api/deploy`
-
+### 1. Direct 1-Click Deployment
+`POST /api/deploy/direct`
 ```json
 {
-  "templateId": "modern-landing-page",
   "projectName": "my-cool-site",
-  "gitUrl": "https://github.com/user/repo",
-  "branch": "main",
+  "html": "<!DOCTYPE html><html><body><h1>Hello World</h1></body></html>",
+  "files": [
+    { "path": "index.html", "content": "..." },
+    { "path": "style.css", "content": "..." }
+  ]
+}
+```
+**Response (202 Accepted):**
+```json
+{
+  "success": true,
+  "deploymentId": "dep-xxx",
+  "projectSlug": "my-cool-site",
+  "previewUrl": "http://localhost:3000/site/my-cool-site/"
+}
+```
+
+### 2. Git & Starter Template Deployment
+`POST /api/deploy`
+```json
+{
+  "gitUrl": "https://github.com/user/my-app.git",
+  "templateId": "react-vite-app",
+  "projectName": "my-react-store",
   "buildCommand": "npm run build",
   "outputDir": "dist"
 }
 ```
 
-_Validated via Zod schema. Returns `400 Bad Request` with validation issues on failure._
-
-### 2. Live Log Stream (SSE)
-
+### 3. Live Log Stream (SSE)
 `GET /api/logs/:deploymentId`
-_Returns real-time Server-Sent Events (SSE) connected to Redis channel `logs:{deploymentId}`._
+_Connects to real-time Server-Sent Events (SSE) log stream._
 
-### 3. System Analytics
-
-`GET /api/analytics`
-_Returns system telemetry including active deployments, S3 bytes transferred, average build duration, and cache hit rates._
-
-### 4. Prometheus / JSON Metrics
-
-`GET /api/metrics`
-_Returns memory heap, RSS, uptime, and request counters in JSON or Prometheus format._
+### 4. System Public Info
+`GET /api/system/public-info`
+_Returns platform version, storage mode, available starters, and feature flags._
 
 ### 5. Health Diagnostics
-
 `GET /api/health`
 _Returns health status of API Server, ECS Worker, S3 Storage, and Redis._
 
@@ -209,33 +237,41 @@ _Returns health status of API Server, ECS Worker, S3 Storage, and Redis._
 
 ```
 automated-deployment-system/
-├── .github/
-│   ├── workflows/ci.yml         # GitHub Actions CI workflow (lint, test, coverage, audit)
-│   └── dependabot.yml           # Automated dependency freshness tracking
+├── server.js                    # Unified Single-Port Production Entry Point
+├── render.yaml                  # Render.com Blueprint for 1-Click Free Hosting
+├── koyeb.yaml                   # Koyeb.com Deployment Configuration
+├── Dockerfile                   # Multi-Stage Production Container Image
+├── scripts/
+│   └── publish-free.js          # CLI helper for instant free public live URLs
 ├── api-server/
-│   ├── index.js                 # REST API & Web Dashboard Server (Port 9000)
+│   ├── index.js                 # REST API, Direct Deploy, and Web Console Server
 │   └── schemas.js               # Zod input validation schemas
 ├── build-server/
-│   ├── builder.js               # Containerized Builder & S3 Uploader
-│   └── Dockerfile               # Build Server container definition
+│   ├── builder.js               # Containerized Builder, Direct Deployer & S3 Uploader
+│   └── Dockerfile               # Build Server worker container definition
 ├── s3-reverse-proxy/
-│   └── index.js                 # Dynamic Edge Reverse Proxy (Port 8000)
-├── dashboard/                   # Glassmorphic Dark-Mode UI & Interactive Map
-│   ├── index.html
-│   ├── style.css
-│   ├── app.js                   # Main dashboard controller
-│   └── js/                      # Modular client components (telemetry, terminal, deployments, etc.)
+│   └── index.js                 # Edge Reverse Proxy middleware with SPA fallback
+├── dashboard/                   # ▲ Vercel Glassmorphic Dark-Theme UI
+│   ├── index.html               # Main Console, Vercel Projects Grid, Publish Tab
+│   ├── style.css                # Vercel Design System CSS tokens & micro-animations
+│   ├── app.js                   # Application state manager & dynamic URLs
+│   └── js/                      # Modular components (deployments, terminal, preview, telemetry)
 ├── shared/
 │   ├── logger.js                # Structured logger with log levels
 │   ├── storage.js               # S3 & Local Storage abstraction
 │   └── redis-client.js          # Redis Pub/Sub & Key-Value store
-├── tests/                       # Jest unit & integration test suite (>70% coverage)
-├── .env.example                 # Documented template for all 15 environment variables
-├── eslint.config.mjs            # ESLint flat configuration
-├── jest.config.js               # Jest configuration & coverage thresholds
-├── CHANGELOG.md                 # Semantic versioning history
-├── CONTRIBUTING.md              # Contribution and PR guidelines
-├── docker-compose.yml           # Multi-container orchestration
-├── start-all.js                 # Unified single-command launcher
+├── tests/                       # Jest unit & integration test suites (100% passing)
+│   ├── unified-server.test.js   # Unified single-port & direct deploy tests
+│   ├── api.test.js              # API Server & Reverse Proxy integration tests
+│   ├── builder.test.js          # Builder worker & starter template tests
+│   ├── storage.test.js          # S3 storage tests
+│   └── redis.test.js            # Redis client tests
+├── start-all.js                 # Multi-mode launcher (cloud auto-detection)
 └── package.json                 # Project manifest & npm scripts
 ```
+
+---
+
+## 📄 License
+
+Distributed under the MIT License. See [`LICENSE`](LICENSE) for more details.

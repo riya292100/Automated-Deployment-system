@@ -1,0 +1,50 @@
+{
+  "short_name": "Vercel Clone",
+  "name": "▲ Vercel Cloud - Autonomous Deployment Platform",
+  "description": "Autonomous Cloud Deployment Console with 1-click deployments, live ANSI log streaming, and S3 edge previews.",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    },
+    {
+      "src": "icons/icon-maskable.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0a0e17",
+  "theme_color": "#000000",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "categories": ["developer-tools", "productivity", "utilities"],
+  "shortcuts": [
+    {
+      "name": "New Deployment",
+      "short_name": "Deploy",
+      "description": "Launch a new cloud deployment",
+      "url": "/#deploy",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Publish Free",
+      "short_name": "Publish",
+      "description": "Publish online for free",
+      "url": "/#publish",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

@@ -10,7 +10,7 @@ class DashboardApp {
     this.preview = new window.PreviewManager();
     this.architecture = new window.ArchitectureVisualizer();
     this.terminal = new window.TerminalManager(this.apiBase, (slug) => {
-      const url = `http://localhost:8000/site/${slug}/`;
+      const url = `${window.location.origin}/site/${slug}/`;
       this.preview.openPreview(url, slug);
       this.telemetry.loadAnalytics();
       this.deployments.loadDeployments(true);
@@ -78,6 +78,10 @@ class DashboardApp {
       preview: {
         title: 'Live Site Preview & CDN Sandbox',
         desc: 'Zero-latency edge-routed preview directly from S3 Reverse Proxy',
+      },
+      publish: {
+        title: 'Publish Free Online - Cloud & Live Tunnels',
+        desc: 'Deploy this Vercel Clone live to the internet 100% free with instant tunnels or 24/7 cloud hosts (Render, Koyeb, Railway)',
       },
       settings: {
         title: 'Cloud Infrastructure Settings',
@@ -152,6 +156,54 @@ class DashboardApp {
     this.switchTab('terminal');
     this.terminal.startBuildStream(deploymentId, projectSlug);
   }
+
+  copyCommand(text, btnElement) {
+    navigator.clipboard.writeText(text).then(() => {
+      if (btnElement) {
+        const orig = btnElement.textContent;
+        btnElement.textContent = '✔ Copied!';
+        btnElement.style.borderColor = 'var(--accent-green)';
+        setTimeout(() => {
+          btnElement.textContent = orig;
+          btnElement.style.borderColor = '';
+        }, 2000);
+      }
+    });
+  }
+
+  setupPwa() {
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch((err) => {
+          console.log('Service Worker registration notice:', err);
+        });
+      });
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      this.deferredPrompt = e;
+      const installBtn = document.getElementById('btn-install-pwa');
+      if (installBtn) {
+        installBtn.style.display = 'inline-flex';
+      }
+    });
+  }
+
+  installPwa() {
+    if (this.deferredPrompt) {
+      this.deferredPrompt.prompt();
+      this.deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User installed Vercel Clone PWA');
+        }
+        this.deferredPrompt = null;
+      });
+    } else {
+      alert('To install on iOS: Tap Share ➔ "Add to Home Screen".\nTo install on Android: Tap Chrome Menu (⋮) ➔ "Install App".');
+    }
+  }
 }
 
 window.app = new DashboardApp();
+window.app.setupPwa();
