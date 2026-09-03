@@ -71,8 +71,58 @@ const redeployParamsSchema = z.object({
   deploymentId: z.string().min(3, 'Invalid deploymentId parameter'),
 });
 
+/**
+ * Validation schema for POST /api/deploy/direct (Drag & Drop or direct file upload)
+ */
+const directDeploySchema = z
+  .object({
+    projectName: z
+      .string()
+      .min(1, 'projectName is required and cannot be empty')
+      .max(64, 'projectName must not exceed 64 characters')
+      .regex(
+        /^[a-zA-Z0-9-_ ]+$/,
+        'projectName can only contain alphanumeric characters, hyphens, and underscores'
+      ),
+    files: z
+      .array(
+        z.object({
+          path: z.string().optional(),
+          name: z.string().optional(),
+          content: z.string().default(''),
+        })
+      )
+      .optional(),
+    html: z.string().optional(),
+    css: z.string().optional(),
+    js: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      const hasFiles = Array.isArray(data.files) && data.files.length > 0;
+      const hasHtml = typeof data.html === 'string' && data.html.trim().length > 0;
+      return hasFiles || hasHtml;
+    },
+    {
+      message: 'Either files array or html content must be provided',
+      path: ['files'],
+    }
+  );
+
+/**
+ * Validation schema for generic deploymentId route param
+ */
+const deploymentIdParamSchema = z.object({
+  deploymentId: z
+    .string()
+    .min(3, 'deploymentId must be at least 3 characters')
+    .max(100, 'deploymentId must not exceed 100 characters'),
+});
+
 module.exports = {
   deploySchema,
+  directDeploySchema,
   storageConfigSchema,
   redeployParamsSchema,
+  deploymentIdParamSchema,
 };

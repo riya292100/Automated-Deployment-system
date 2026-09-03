@@ -30,7 +30,7 @@ describe('Unified Vercel Server & Direct Deployment Suite', () => {
     test('should reject direct deployment without projectName', async () => {
       const res = await request(apiApp).post('/api/deploy/direct').send({ html: '<h1>Test</h1>' });
       expect(res.status).toBe(400);
-      expect(res.body.error).toContain('projectName');
+      expect(res.body.error).toBe('Validation Error');
     });
 
     test('should reject direct deployment without files or html', async () => {
